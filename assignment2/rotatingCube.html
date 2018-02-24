@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- Gray Olson -->
+<!-- CSE 470 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>3d Rotating Cubes</title>
+<link rel="stylesheet" href="./tailwind.min.css"/>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+// HW470: receive color from vertex shader
+varying vec4 fColor;
+
+void main()
+{
+    // HW470: Set color
+    gl_FragColor = fColor;
+}
+</script>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+// Standard vertex attributes
+attribute vec4 vPosition;
+attribute vec3 vColor;
+// Color varying to send to frag shader
+varying vec4 fColor;
+
+//HW470: Define the projection and modelview matrices as uniforms
+uniform mat4 uProjection;
+uniform mat4 uModelView;
+
+void main()
+{
+    // HW470 Send color to frag shader
+    fColor = vec4(vColor, 1.0);
+    // HW470: Set final position by translating the original vertex position by the modelview matrix
+    // then the projection matrix
+    gl_Position = uProjection * uModelView * vPosition;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="rotatingCube.js"></script>
+<script type="text/javascript" src="CreateCubeHW2.js"></script>
+</head>   
+
+<body>
+    <!--HW470: Styles done using Tailwind CSS -->
+    <div class="text-sans container mx-auto flex flex-col justify-content items-center">
+        <h1 class="my-8 py-4">
+            CSE 470 HW #2: Rotating Cubes
+        </h1>
+        <div class="pb-4 flex flex-col justify-around items-center">
+            <h2 class='inline-block m-2'>Gray Olson</h2> <h3 class='m-2 inline-block'>February 23, 2018</h2>
+        </div>
+        <p class="m-4 p2 leading-loose"><b>Description:</b> An interactive 3d rendering of rotating cubes. You can click on the canvas to add a new cube at your cursor's position at a random Z value between -0.5 and 0.5. You can also use the <span class="text-blue-light font-semibold">Rotate on &lt;X&gt; Axis</span> buttons, which will make the cubes rotate around that axis instead of the one they are currently rotating around.</p>
+        <div class="py-4 flex justify-center items-center">
+            <!-- HW470: Rotation buttons -->
+            <button id="rotatex" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on X Axis
+            </button>
+            <button id="rotatey" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Y Axis
+            </button>
+            <button id="rotatez" class="bg-transparent hover:bg-blue text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Z Axis
+            </button>
+            <button id="rotaterand" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Random Axis
+            </button>
+        </div>
+        <p class="text-small text-grey-dark">Click the canvas to add a cube!</p>
+        <!-- HW470: Increase canvas size -->
+        <canvas class="my-8" id="gl-canvas" width="960" height="540">
+        Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+</html>
