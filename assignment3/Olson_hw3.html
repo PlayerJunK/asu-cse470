@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>Lights, Camera, Action!</title> 
+    <link rel="stylesheet" href="./tailwind.min.css"/>
+
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Olson_hw3.js"></script> 
+<script type="text/javascript" src="Olson_geometry.js"></script> 
+
+<!-- **************************************************************** -->
+<!-- ***************  SHADERS  ************************************************* -->
+
+<!-- Vertex shader 0 (you could use this for the light) -->
+
+ 
+
+<!-- Vertex shader 1: lighting calculations -->
+<!-- Lighting calculations are done in eye coordinates  -->
+
+<script id="vertex-shader1" type="x-shader/x-vertex">
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexNormal;
+
+            
+uniform vec4 lightPosition; 
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+
+varying vec4 fColor;
+
+
+void main()
+{   
+    vec3 eye = vec3(0.0, 0.0, 0.0);
+    vec3 position = (u_mvMatrix * a_vertexPosition).xyz;
+    vec3 light = (u_mvMatrix * lightPosition).xyz;
+    vec3 L = normalize(light - position);
+    vec3 E = normalize(eye - position);
+    vec3 H = normalize(L + E);
+    vec3 N = normalize( (u_mvMatrix * a_vertexNormal).xyz);
+                     
+
+    // Compute lighting
+    vec4 ambient = ambientProduct;
+
+    float Kd = max(dot(L, N), 0.0);
+    vec4 diffuse = Kd * diffuseProduct;
+                     
+
+    float Ks = pow(max(dot(N, H), 0.0), shininess);
+    vec4 specular = specularProduct* Ks;
+
+    // No specular highlighting on the back			 
+    if(dot(L, N) < 0.0) {
+        specular = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+                     
+
+    gl_Position = u_projMatrix * u_mvMatrix * a_vertexPosition;
+
+    fColor = ambient + diffuse + specular;
+                     
+    // Tip: This is the kind of statement you can use to debug 
+    // Set the outgoing color to something outside of the norm if a value has a certain state
+    //if(position[2] > -3.0) fColor = vec4(1.0, 0.0, 1.0, 1.0);
+    fColor.a = 1.0;
+}
+</script>
+<script id="basic-vertex-shader" type="x-shader/x-vertex">
+    //HW470: Basic vertex shader
+attribute vec4 vPosition;
+
+varying vec4 fColor;
+
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+void main()
+{
+    //HW470: Make color always white and transform based on mv/p matrices
+    fColor = vec4(1.0);
+    gl_Position = u_projMatrix * u_mvMatrix * vPosition;
+}
+</script>	
+
+<script id="normals-vertex-shader" type="x-shader/x-vertex">
+    //HW470: Simple vertex shader for normals render
+attribute vec4 vPosition;
+
+varying vec4 fColor;
+
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+void main()
+{
+    //HW470: Make color always pink and transform based on mv/p matrices
+    fColor = vec4(1.0, 0.5, 0.5, 1.0);
+    gl_Position = u_projMatrix * u_mvMatrix * vPosition;
+}
+</script>	
+
+<script id="light-vertex-shader" type="x-shader/x-vertex">
+    //HW470: Simple vertex shader for light render
+attribute vec4 vPosition;
+
+varying vec4 fColor;
+
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+void main()
+{
+    //HW470: Color always white
+    fColor = vec4(1.0);
+    //HW470: transform based on mv/p matrices
+    gl_Position = u_projMatrix * u_mvMatrix * vPosition;
+    //HW470 scale point size based on perspective division
+    //component so that it gets larget and smaller as it goes
+    //towards and away the viewer
+    gl_PointSize = 20.0/gl_Position.w;
+}
+</script>	
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<!-- *********  END SHADERS  ******************************************************* -->
+<!-- **************************************************************** -->
+</head>
+
+<body>
+    <!--HW470: Styles done using Tailwind CSS -->
+    <div class="text-sans container mx-auto flex flex-col justify-content items-center">
+            <h1 class="my-8 py-4">
+                CSE 470 HW #3: Lights, Camera, Action!
+            </h1>
+            <div class="pb-4 flex flex-col justify-around items-center">
+                <h2 class='inline-block m-2'>Gray Olson</h2> <h3 class='m-2 inline-block'>April 2nd, 2018</h3>
+            </div>
+            <p class="m-4 p2 leading-loose">
+                <b>Description:</b> This program displays two Gourad-shaded Surfaces of Revolution. The first is simply a 
+                cylinder and the second is a pot/vase-looking object based on a sin-wave generator function.
+            </p>
+            <p class="m-4 p2 leading-loose">
+                <b>Materials:</b>The two materials I made were meant to
+                immitate a shiny blue plastic and a metallic copper like material. The plastic is done with a high
+                shininess factor to make it look glossy and the specular is pure white since it is a nonmetallic substance.
+                The copper material on the other hand as a fairly low shininess factor to make it look like it is not perfectly
+                shiny/chromed but rather a bit foggy. It specular highlight has a tint, biased red based on its own color, which
+                gives it a familiar metallic look.
+            </p>
+            <div class="py-4 flex justify-center items-center">
+                <!-- HW470: Object/material buttons -->
+                <button id="cylinder" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    View Cylinder
+                </button>
+                <button id="pot" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    View Pot
+                </button>
+                <button id="plastic" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    Use Plastic
+                </button>
+                <button id="copper" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    Use Copper
+                </button>
+                <button id="eyelight" class="bg-transparent hover:bg-blue text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    Follow Eye with Light (Toggle)
+                </button>
+                <button id="rotatelight" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    Rotate Light
+                </button>
+            </div>
+            <div class="py-4 flex justify-center items-center">
+                <!-- HW470: Debug draw buttons/sliders -->
+                <button id="wireframe" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    View Wireframe
+                </button>
+                <button id="normals" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    View Normals
+                </button>
+                <div>
+                    <span class="px-4">Light Radius</span>
+                    <input id="lightradius" type="range" min="20" max="200" value="2"/>
+                </div>
+                <div>
+                    <span class="px-4">Shininess</span>
+                    <input id="shininess" type="range" min="1" max="100" value="20"/>
+                </div>
+                <div>
+                    <span class="px-4">FoV</span>
+                    <input id="fov" type="range" min="10" max="100" value="60"/>
+                </div>
+            </div>
+            <p class="text-small text-grey-dark">Click the canvas to add a cube!</p>
+            <!-- HW470: Increase canvas size -->
+            <canvas class="my-8" id="gl-canvas" width="540" height="540">
+            Oops ... your browser doesn't support the HTML5 canvas element
+            </canvas>
+        </div>
+    </body>
+</html>
