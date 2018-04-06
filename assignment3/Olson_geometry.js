@@ -88,8 +88,7 @@ function geometry(surfaceGenerator, tesselationFnDir, tesselationRotDir) {
       const rot = rotateY(theta)
       let vert = multMatVec(rot, baseVec);
       let slope = surfaceGenerator.derivative(t);
-      slope = slope === 0 ? 0 : -1*slope
-      const norm = normalize(vec4(vert[0], slope, vert[2], 0), true);
+      const norm = normalize(vec4(Math.cos(radians(theta)), -slope, Math.sin(radians(theta)), 0), true);
       vertices.push(vert);
       normals.push(norm);
       normalDrawVerts.push(vert);
