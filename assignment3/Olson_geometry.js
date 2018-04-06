@@ -11,8 +11,9 @@ var surfaceRevOptions =
     inputChoice: 0,	
     // HW470: Each of these is an object, the structure is explained below
     // (the surfaceGenerator argument to geometry)
-    CYLINDER: { curve: cylinderCurve, derivative: cylinderDerivative},
-    MYSURFACE: { curve: potCurve, derivative: potDerivative}
+    CYLINDER: { curve: cylinderCurve, derivative: cylinderDerivative },
+    MYSURFACE: { curve: potCurve, derivative: potDerivative },
+    MYSURFACE2: { curve: pot2Curve, derivative: pot2Derivative }
   }
 
 // HW470: Custom function for SoR
@@ -23,6 +24,15 @@ function potCurve(t) {
 // HW470: Derivative of said custom function
 function potDerivative(t) {
   return -Math.PI / 4 * Math.cos(Math.PI * t)
+}
+
+function pot2Curve(t) {
+
+  return Math.sin(-1 * t*Math.PI) / 8 + Math.sin(t*2*Math.PI + Math.PI) / 4 + 0.5
+}
+
+function pot2Derivative(t) {
+  return -Math.PI / 8 * (Math.cos(Math.PI * t) + 4 * Math.cos(2*Math.PI*t))
 }
 
 // HW470: Cylinder generator function
@@ -78,7 +88,8 @@ function geometry(surfaceGenerator, tesselationFnDir, tesselationRotDir) {
       const rot = rotateY(theta)
       let vert = multMatVec(rot, baseVec);
       let slope = surfaceGenerator.derivative(t);
-      const norm = normalize(vec4(vert[0], -1 * slope, vert[2], 0), true);
+      slope = slope === 0 ? 0 : -1*slope
+      const norm = normalize(vec4(vert[0], slope, vert[2], 0), true);
       vertices.push(vert);
       normals.push(norm);
       normalDrawVerts.push(vert);

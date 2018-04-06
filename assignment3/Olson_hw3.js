@@ -44,6 +44,13 @@ var potObject =
 
   };
 
+var vaseObject = 
+  {
+    //HW470: holds geometry for object
+    geometry: null,
+
+  };
+
 //HW470: A blue plastic material
     // material properties  
 var plastic = {
@@ -67,12 +74,12 @@ var activeObject =null;
 
 var viewer = 
   {
-    eye: vec3(0.0, 0.0, 2.0),
+    eye: vec3(0.0, 0.0, 3.0),
     at:  vec3(0.0, 0.0, 0.0),  
     up:  vec3(0.0, 1.0, 0.0),
 
     // for moving around object; set vals so at origin
-    radius: 2.0,
+    radius: 3.0,
     theta: 0,
     phi: 0
   };
@@ -235,19 +242,23 @@ window.onload = function init() {
   cylinderObject.geometry = geometry(surfaceRevOptions.CYLINDER, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
   console.log(`Cylinder Minmax Box Dimensions: (${cylinderObject.geometry.maxZ*2}, 2, ${cylinderObject.geometry.maxZ*2})`);
 
-  //HW470 Pre-compute lighting model products for plastic mat
-  plastic.ambientProduct = mult(plastic.ambient, light.ambient);
-  plastic.diffuseProduct = mult(plastic.diffuse, light.diffuse);
-  plastic.specularProduct = mult(plastic.specular, light.specular);
-
   //HW470 create geometry for pot
   potObject.geometry = geometry(surfaceRevOptions.MYSURFACE, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
   console.log(`Pot Minmax Box Dimensions: (${potObject.geometry.maxZ*2}, 2, ${potObject.geometry.maxZ*2})`);
+
+  //HW470 create geometry for pot
+  vaseObject.geometry = geometry(surfaceRevOptions.MYSURFACE2, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
+  console.log(`Pot Minmax Box Dimensions: (${vaseObject.geometry.maxZ*2}, 2, ${vaseObject.geometry.maxZ*2})`);
 
   //HW470 Pre-compute lighting model products for bronze mat
   copper.ambientProduct = mult(copper.ambient, light.ambient);
   copper.diffuseProduct = mult(copper.diffuse, light.diffuse);
   copper.specularProduct = mult(copper.specular, light.specular);
+
+  //HW470 Pre-compute lighting model products for plastic mat
+  plastic.ambientProduct = mult(plastic.ambient, light.ambient);
+  plastic.diffuseProduct = mult(plastic.diffuse, light.diffuse);
+  plastic.specularProduct = mult(plastic.specular, light.specular);
 
   // HW470: Initialize buffers (will comment rest of this section but not continue spamming HW470...)
   gl.useProgram(program1);
@@ -321,9 +332,9 @@ window.onload = function init() {
   setMat(plastic)
 
   // set initial eye position now that we know dz
-  viewer.eye = vec3(0.0, 0.0, 2*dz)
-  console.log(`Initial eye pos: (0, 0, ${2*dz}), at: (0, 0, 0), up: <0, 1, 0>`);
-  viewer.radius = 2*dz
+  viewer.eye = vec3(0.0, 0.0, 3*dz)
+  console.log(`Initial eye pos: (0, 0, ${3*dz}), at: (0, 0, 0), up: <0, 1, 0>`);
+  viewer.radius = 3*dz
 
 
   // HW470: initialize and set up uniform locations for mv/p matrices
@@ -362,6 +373,9 @@ window.onload = function init() {
   }
   document.getElementById('pot').onclick = e => {
     setObject(potObject)
+  }
+  document.getElementById('vase').onclick = e => {
+    setObject(vaseObject)
   }
   document.getElementById('plastic').onclick = e => {
     setMat(plastic)

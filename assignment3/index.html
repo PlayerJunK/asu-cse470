@@ -176,12 +176,17 @@ main()
                 <button id="pot" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
                     View Pot
                 </button>
+                <button id="vase" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                    View vase
+                </button>
                 <button id="plastic" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
                     Use Plastic
                 </button>
                 <button id="copper" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
                     Use Copper
                 </button>
+            </div>
+            <div class="py-4 flex justify-center items-center">
                 <button id="eyelight" class="bg-transparent hover:bg-blue text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
                     Follow Eye with Light (Toggle)
                 </button>
@@ -197,6 +202,8 @@ main()
                 <button id="normals" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
                     View Normals
                 </button>
+            </div>
+            <div class="py-4 flex justify-center items-center">
                 <div>
                     <span class="px-4">Light Radius</span>
                     <input id="lightradius" type="range" min="20" max="200" value="2"/>
@@ -212,7 +219,7 @@ main()
             </div>
             <p class="text-small text-grey-dark">Click the canvas to add a cube!</p>
             <!-- HW470: Increase canvas size -->
-            <canvas class="my-8" id="gl-canvas" width="540" height="540">
+            <canvas class="my-8" id="gl-canvas" width="960" height="960">
             Oops ... your browser doesn't support the HTML5 canvas element
             </canvas>
         </div>
