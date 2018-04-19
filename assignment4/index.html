@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!-- Gray Olson -->
+<!-- CSE 470 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>3d Rotating Cubes</title>
+<link rel="stylesheet" href="./tailwind.min.css"/>
+
+<!-- HW470: BASIC SHADERS -->
+<script id="fragment-basic" type="x-shader/x-fragment">
+// HW470: Basic fragment shader
+precision mediump float;
+
+// HW470: receive color from vertex shader
+varying vec4 fColor;
+
+void main()
+{
+    // HW470: Set color
+    gl_FragColor = fColor;
+}
+</script>
+
+<script id="vertex-basic" type="x-shader/x-vertex">
+// Standard vertex attributes
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexColor;
+attribute vec2 a_texCoord;
+
+// Color varying to send to frag shader
+varying vec4 fColor;
+
+//HW470: Define the projection and modelview matrices as uniforms
+uniform mat4 u_projMatrix;
+uniform mat4 u_mvMatrix;
+
+void main()
+{
+    // HW470 Send color to frag shader
+    fColor = a_vertexColor;
+    // HW470: Set final position by translating the original vertex position by the modelview matrix
+    // then the projection matrix
+    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+}
+</script>
+
+<script id="vertex-light" type="x-shader/x-vertex">
+//HW470: Simple vertex shader for light render
+attribute vec4 a_vertexPosition;
+
+varying vec4 fColor;
+
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+void main()
+{
+    //HW470: Color always white
+    fColor = vec4(1.0);
+    //HW470: transform based on mv/p matrices
+    gl_Position = u_projMatrix * u_mvMatrix * vPosition;
+    //HW470 scale point size based on perspective division
+    //component so that it gets larget and smaller as it goes
+    //towards and away the viewer
+    gl_PointSize = 20.0/gl_Position.w;
+}
+</script>	
+
+<!-- HW470: SHADED SHADERS -->
+<script id="vertex-gourad" type="x-shader/x-vertex">
+//HW470: Vertex attributes
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexNormal;
+attribute vec2 a_texCoord;
+            
+//HW470: Light attributes
+uniform vec4 lightPosition; 
+uniform vec3 ligthColor;
+
+//HW470: Material attributes
+uniform vec3 matAmb;
+uniform vec3 matDif;
+uniform vec3 matSpec;
+uniform vec3 constants;
+uniform float shininess;
+
+//HW470: MVP matrices
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+
+varying vec4 fColor;
+
+void main()
+{   
+    vec3 eye = vec3(0.0, 0.0, 0.0);
+    vec3 position = (u_mvMatrix * a_vertexPosition).xyz;
+    vec3 light = (u_mvMatrix * lightPosition).xyz;
+    vec3 lVec = light - position;
+    float lMagSqr = dot(lVec, lVec);
+    vec3 L = lVec / sqrt(lMagSqr);
+    vec3 E = normalize(eye - position);
+    vec3 R = normalize(L + E);
+    vec3 N = normalize( (u_mvMatrix * a_vertexNormal).xyz);
+                     
+    // Compute lighting
+    float Ka = constants.x;
+    float Kd = constants.y;
+    float Ks = constants.z;
+
+    // ambient
+    vec3 ambient = Ka * matAmb;
+
+    // diffuse
+    float d = max(dot(L, N), 0.0);
+    vec3 diffuse = Kd * d / lMagSqr * (matDif * lightColor);
+
+    // specular
+    float s = pow(max(dot(N, R), 0.0), shininess);
+    vec3 specular = Ks * s / lMagSqr * (matSpec * lightColor);
+
+    // No specular highlighting on the back			 
+    specular = vec3(step(0.0, dot(L, N))) * specular;
+                     
+    // sum
+    fColor = vec4(ambient + diffuse + specular, 1.0);
+    
+    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+}
+</script>
+
+<script id="vertex-phong" type="x-shader/x-vertex">
+//HW470: Vertex shader for phong shading
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexNormal;
+attribute vec2 a_texCoord;
+
+//HW470: Vertex attributes varied
+varying vec4 v_vertexPosition;
+varying vec4 v_vertexNormal;
+varying vec2 v_texCoord;
+
+//HW470: MVP matrices
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+
+void main()
+{
+    // HW470 Send varied normals/position to frag shader
+    v_vertexPosition = a_vertexPosition;
+    v_vertexNormal = a_vertexNormal;
+
+    // HW470: Set final position by translating the original vertex position by the modelview matrix
+    // then the projection matrix
+    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+}
+</script>
+
+<script id="fragment-phong" type="x-shader/x-vertex">
+//HW470: Vertex attributes varied
+varying vec4 v_vertexPosition;
+varying vec4 v_vertexNormal;
+varying vec2 v_texCoord;
+            
+//HW470: Light attributes
+uniform vec4 lightPosition; 
+uniform vec3 lightColor;
+
+//HW470: Material attributes
+uniform vec3 matAmb;
+uniform vec3 matDif;
+uniform vec3 matSpec;
+uniform vec4 constants;
+
+//HW470: MVP matrices
+uniform mat4 u_mvMatrix; 
+uniform mat4 u_projMatrix; 
+
+void main()
+{   
+    vec3 eye = vec3(0.0, 0.0, 0.0);
+    vec3 position = (u_mvMatrix * v_vertexPosition).xyz;
+    vec3 light = (u_mvMatrix * lightPosition).xyz;
+    vec3 lVec = light - position;
+    float lMagSqr = dot(lVec, lVec);
+    vec3 L = lVec / sqrt(lMagSqr);
+    vec3 E = normalize(eye - position);
+    vec3 R = normalize(L + E);
+    vec3 N = normalize((u_mvMatrix * v_vertexNormal).xyz);
+                     
+    // Compute lighting
+    float Ka = constants.x;
+    float Kd = constants.y;
+    float Ks = constants.z;
+    float shininess = constants.w;
+
+    // ambient
+    vec3 ambient = Ka * matAmb;
+
+    // diffuse
+    float d = max(dot(L, N), 0.0);
+    vec3 diffuse = Kd * d / lMagSqr * (matDif * lightColor);
+
+    // specular
+    float s = pow(max(dot(N, R), 0.0), shininess);
+    vec3 specular = Ks * s / lMagSqr * (matSpec * lightColor);
+
+    // No specular highlighting on the back			 
+    specular = vec3(step(0.0, dot(L, N))) * specular;
+                     
+    // sum
+    gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
+}
+</script>
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="object.js"></script>
+<script type="text/javascript" src="scene.js"></script>
+<script type="text/javascript" src="Olson_hw4.js"></script>
+</head>   
+
+<body>
+    <!--HW470: Styles done using Tailwind CSS -->
+    <div class="text-sans container mx-auto flex flex-col justify-content items-center">
+        <h1 class="my-8 py-4">
+            CSE 470 HW #2: Rotating Cubes
+        </h1>
+        <div class="pb-4 flex flex-col justify-around items-center">
+            <h2 class='inline-block m-2'>Gray Olson</h2> <h3 class='m-2 inline-block'>February 23, 2018</h2>
+        </div>
+        <p class="m-4 p2 leading-loose"><b>Description:</b> An interactive 3d rendering of rotating cubes. You can click on the canvas to add a new cube at your cursor's position at a random Z value between -0.5 and 0.5. You can also use the <span class="text-blue-light font-semibold">Rotate on &lt;X&gt; Axis</span> buttons, which will make the cubes rotate around that axis instead of the one they are currently rotating around.</p>
+        <div class="py-4 flex justify-center items-center">
+            <!-- HW470: Rotation buttons -->
+            <button id="rotatex" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on X Axis
+            </button>
+            <button id="rotatey" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Y Axis
+            </button>
+            <button id="rotatez" class="bg-transparent hover:bg-blue text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Z Axis
+            </button>
+            <button id="rotaterand" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Rotate on Random Axis
+            </button>
+        </div>
+        <p class="text-small text-grey-dark">Click the canvas to add a cube!</p>
+        <!-- HW470: Increase canvas size -->
+        <canvas class="my-8" id="gl-canvas" width="960" height="540">
+        Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+</html>
