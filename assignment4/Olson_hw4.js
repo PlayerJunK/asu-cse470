@@ -15,7 +15,8 @@ var staticData = {
   colors: []
 };
 
-var SHADER_PROGRAMS;
+var SHADER_PROGRAMS = {};
+var scene;
 
 // HW470: Function to multiply a 4d matrix with a 4d vector
 function mult4(mat, vec) {
@@ -45,79 +46,31 @@ function init() {
   SHADER_PROGRAMS.GOURAD = initShaders(gl, "vertex-gourad", "fragment-basic");
 
   //HW470 Create the geometry for cylinder
-  var cylinderGeo = geometry(surfaceRevOptions.CYLINDER, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
+  var cylinderGeo = surfaceOfRevolution(surfaceRevOptions.CYLINDER, blueGenerator, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
 
   //HW470 create geometry for pot
-  var potGeo = geometry(surfaceRevOptions.MYSURFACE, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
+  var potGeo = surfaceOfRevolution(surfaceRevOptions.MYSURFACE, blueGenerator, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
 
-  // HW470: initialize and set up uniform locations
-  uProjLoc = gl.getUniformLocation(program, "uProjection");
-  uModelViewLoc = gl.getUniformLocation(program, "uModelView");
-  // HW470: Setup ortho projection matrix based on canvas aspect ratio
-  var aspect = canvas.width / canvas.height;
-  var proj = ortho(-1 * aspect, 1 * aspect, -1, 1, -10, 10);
-  // HW470: Create inverse projection for use later
-  var inverseProj = inverse4(proj);
-  // HW470: Setup initial cube's model matrix
-  // HW470: Send initial data to uniforms
-  gl.uniformMatrix4fv(uProjLoc, false, flatten(proj));
-  gl.uniformMatrix4fv(uModelViewLoc, false, flatten(cubeInstances[0].transform.getTransform()));
+  scene = new Scene(gl);
+  scene.camera = new Camera(new Transform(0,0,-1), 65, canvas.width/canvas.height, 0.1, 50);
 
-  // HW470: Setup click event
-  canvas.onclick = (e) => {
-    // HW470: First get canvas-relative pixel coordinates of the click
-    var screenx = e.pageX - canvas.offsetLeft;
-    var screeny = canvas.height - (e.pageY - canvas.offsetTop);
-    // HW470: then normalize them to OGL -1, 1 space
-    var normx = 2 * (screenx / canvas.width) - 1;
-    var normy = 2 * (screeny / canvas.height) - 1;
-    // HW470: Unproject normalized coordinates using inverse projection matrix
-    var projected = mult4(inverseProj, vec4(normx, normy, 0, 1));
-    // HW470: Randomize z from -0.5, 0.5
-    projected[2] = Math.random() - 0.5;
-    // HW470: Add new cube instance
-    addCube({
-      transform: new Transform(projected[0], projected[1], projected[2]),
-      // HW470: Random speed between -1 and 1
-      speed: Math.random() * 2 - 1
-    })
+  let mat = new PhongMaterial(gl, {
+    ambient: vec3(0.1, 0.1, 0.2),
+    diffuse: vec3(0.6, 0.6, 0.8),
+    specular: vec3(1,1,1),
+    constants: new PhongConstants(1.0, 1.0, 0.6, 500)
+  })
+  let entity = new Entity(gl, potGeo, mat)
 
-  }
+  scene.entities.push(entity)
 
-  // HW470: Setup rotation buttons
-  document.getElementById('rotatex').onclick = e => {
-    rotationAxis = xAxis
-  }
-  document.getElementById('rotatey').onclick = e => {
-    rotationAxis = yAxis
-  }
-  document.getElementById('rotatez').onclick = e => {
-    rotationAxis = zAxis
-  }
-  document.getElementById('rotaterand').onclick = e => {
-    rotationAxis = vec3(Math.random(), Math.random(), Math.random())
-  }
-
-  // HW470: Start render loop
   render();
 }
 
 window.onload = init
 
 function render() {
-  // HW470 clear color and depth buffers
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  // HW470 Draw each cube instance
-  cubeInstances.forEach(cube => {
-    // HW470: First we rotate this cube around the rotation axis by its speed
-    cube.transform.rotate(cube.speed, rotationAxis);
-    // HW470: Then recompute the transform matrix
-    cube.transform.computeTransform();
-    // HW470: Send the new data to the gpu in the modelview uniform
-    gl.uniformMatrix4fv(uModelViewLoc, false, flatten(cube.transform.getTransform()));
-    // HW470: Draw the static verticies transformed by the matrix
-    gl.drawArrays(gl.TRIANGLES, 0, staticData.vertices.length);
-  })
+  scene.draw(gl)
   // HW470: Get next availale frame and run this function again
   window.requestAnimationFrame(render);
 }

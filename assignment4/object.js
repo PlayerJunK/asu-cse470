@@ -48,7 +48,7 @@ PhongConstants.prototype.asVec = function () {
 
 function PhongMaterial(gl, props) {
   this.kind = 'phong'
-  this.props = { ka, kd, ks, s }
+  this.props = props
   this.locs = {
     matAmb: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'matAmb'),
     matDif: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'matDif'),
@@ -69,65 +69,6 @@ function BasicMaterial(properties) {
   this.props = props
 }
 
-function Geometry(positions, colors, normals, texCoords, indices) {
-  this.positions = positions
-  this.colors = colors
-  this.normals = normals
-  this.texCoords = texCoords
-  this.indices = indices
-  this.initialized = false
-}
-
-Geometry.prototype.initGL = function (gl) {
-  if (!this.initialized) {
-    this.buffers = {
-      position: gl.createBuffer(),
-      color: gl.createBuffer(),
-      normal: gl.createBuffer(),
-      texCoord: gl.createBuffer(),
-      index: gl.createBuffer()
-    }
-  }
-  this.sendData(gl)
-}
-
-Geometry.prototype.sendData = function (gl) {
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(this.positions), gl.STATIC_DRAW)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normal)
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.texCoord)
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(this.texCoords), gl.STATIC_DRAW)
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.index)
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(this.indices)), gl.STATIC_DRAW)
-}
-
-Geometry.prototype.enableAttributes = function (gl, locs) {
-  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
-  gl.vertexAttribPointer(locs.position, 4, gl.FLOAT, false, 0, 0)
-  gl.enableVertexAttribArray(locs.position)
-
-  if (typeof locs.color !== 'undefined') {
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color)
-    gl.vertexAttribPointer(locs.color, 4, gl.FLOAT, false, 0, 0)
-    gl.enableVertexAttribArray(locs.color)
-  }
-
-  if (typeof locs.normal !== 'undefined') {
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normal)
-    gl.vertexAttribPointer(locs.normal, 4, gl.FLOAT, false, 0, 0)
-    gl.enableVertexAttribArray(locs.normal)
-  }
-
-  if (typeof locs.texCoord !== 'undefined') {
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.texCoord)
-    gl.vertexAttribPointer(locs.texCoord, 2, gl.FLOAT, false, 0, 0)
-    gl.enableVertexAttribArray(locs.texCoord)
-  }
-}
 
 function InstanceTransform(move, deform) {
   this.movement = move
@@ -138,7 +79,7 @@ InstanceTransform.prototype.computeTransform = function () {
   this.transform = mult(this.movement.transform, this.deformation.transform)
 }
 
-function Object(gl, geometry, material) {
+function Entity(gl, geometry, material) {
   this.transform = new Transform(0, 0, 0)
   this.geometry = geometry
   this.material = material
@@ -164,16 +105,16 @@ function Object(gl, geometry, material) {
   this.geometry.initGL(gl)
 }
 
-Object.prototype.sendData = function (gl) {
+Entity.prototype.sendData = function (gl) {
   this.material.sendData(gl)
   this.geometry.sendData(gl)
 }
 
-Object.prototype.bind = function(gl) {
+Entity.prototype.bind = function(gl) {
   gl.useProgram(this.material.shaderProgram)
   this.geometry.enableAttributes(gl, this.material.locs)
 }
 
-Object.prototype.draw = function (gl) {
+Entity.prototype.draw = function (gl) {
   gl.drawElements(gl.TRIANGLES, this.geometry.indices.length, gl.UNSIGNED_SHORT, 0)
 }

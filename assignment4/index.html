@@ -75,7 +75,7 @@ attribute vec2 a_texCoord;
             
 //HW470: Light attributes
 uniform vec4 lightPosition; 
-uniform vec3 ligthColor;
+uniform vec3 lightColor;
 
 //HW470: Material attributes
 uniform vec3 matAmb;
@@ -129,6 +129,7 @@ void main()
 </script>
 
 <script id="vertex-phong" type="x-shader/x-vertex">
+precision mediump float;
 //HW470: Vertex shader for phong shading
 attribute vec4 a_vertexPosition;
 attribute vec4 a_vertexNormal;
@@ -156,6 +157,7 @@ void main()
 </script>
 
 <script id="fragment-phong" type="x-shader/x-vertex">
+precision mediump float;
 //HW470: Vertex attributes varied
 varying vec4 v_vertexPosition;
 varying vec4 v_vertexNormal;
@@ -218,6 +220,7 @@ void main()
 <script type="text/javascript" src="../Common/MV.js"></script>
 <script type="text/javascript" src="object.js"></script>
 <script type="text/javascript" src="scene.js"></script>
+<script type="text/javascript" src="geometry.js"></script>
 <script type="text/javascript" src="Olson_hw4.js"></script>
 </head>   
 

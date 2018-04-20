@@ -1,6 +1,75 @@
 // Gray Olson
 //
 
+function Geometry(positions, colors, normals, texCoords, indices) {
+  this.positions = positions
+  this.colors = colors
+  this.normals = normals
+  this.texCoords = texCoords
+  this.indices = indices
+  this.initialized = false
+}
+
+Geometry.prototype.initGL = function (gl) {
+  if (!this.initialized) {
+    this.buffers = {
+      position: gl.createBuffer(),
+      color: gl.createBuffer(),
+      normal: gl.createBuffer(),
+      texCoord: gl.createBuffer(),
+      index: gl.createBuffer()
+    }
+  }
+  this.sendData(gl)
+}
+
+Geometry.prototype.sendData = function (gl) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(this.positions), gl.STATIC_DRAW)
+
+  if (typeof this.colors !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color)
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(this.colors), gl.STATIC_DRAW)
+  }
+
+  if (typeof this.normals !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normal)
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW)
+  }
+
+  if (typeof this.texCoords !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.texCoord)
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(this.texCoords), gl.STATIC_DRAW)
+  }
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.index)
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(this.indices)), gl.STATIC_DRAW)
+}
+
+Geometry.prototype.enableAttributes = function (gl, locs) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
+  gl.vertexAttribPointer(locs.position, 4, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(locs.position)
+
+  if (typeof locs.color !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color)
+    gl.vertexAttribPointer(locs.color, 4, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(locs.color)
+  }
+
+  if (typeof locs.normal !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normal)
+    gl.vertexAttribPointer(locs.normal, 4, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(locs.normal)
+  }
+
+  if (typeof locs.texCoord !== 'undefined') {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.texCoord)
+    gl.vertexAttribPointer(locs.texCoord, 2, gl.FLOAT, false, 0, 0)
+    gl.enableVertexAttribArray(locs.texCoord)
+  }
+}
+
 // Surface of revolutions to choose from
 // input params go in call to makeSurfRev
 var surfaceRevOptions = 
@@ -45,6 +114,10 @@ function cylinderDerivative(t) {
   return 0
 }
 
+function blueGenerator(t, s) {
+  return vec4(0.3, 0.3, 0.8, 1.0)
+}
+
 // HW 470: function to multiply a matrix and vector for transformation
 function multMatVec(u, v) {
   for ( var i = 0; i < u.length; ++i ) {
@@ -72,9 +145,11 @@ function multMatVec(u, v) {
 // surfaceGenerator is an object containing two functions: curve and derivative
 // curve generates g(t) (the curve) and derivative generates g'(t) (to calculate
 // normal)
-function geometry(surfaceGenerator, tesselationFnDir, tesselationRotDir) {
+function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir, tesselationRotDir) {
   let vertices = [];
   let normals = [];
+  let colors = [];
+  let texCoords = [];
   let normalDrawVerts = [];
   let indices = [];
   let wireIndices = [];
@@ -91,6 +166,8 @@ function geometry(surfaceGenerator, tesselationFnDir, tesselationRotDir) {
       const norm = normalize(vec4(Math.cos(radians(theta)), -slope, Math.sin(radians(theta)), 0), true);
       vertices.push(vert);
       normals.push(norm);
+      colors.push(colorGenerator(theta, t));
+      texCoords.push(vec2(theta/360, (t + 1) / 0.5));
       normalDrawVerts.push(vert);
       normalDrawVerts.push(add(vert, scale(0.1, norm)));
     }
@@ -116,13 +193,14 @@ function geometry(surfaceGenerator, tesselationFnDir, tesselationRotDir) {
       numTris += 2;
     }
   }
-  return {
-    vertices,
-    normals,
-    normalDrawVerts,
-    indices,
-    wireIndices,
-    numTris,
-    maxZ
-  }
+  return new Geometry(vertices, colors, normals, texCoords, indices)
+  // return {
+  //   vertices,
+  //   normals,
+  //   normalDrawVerts,
+  //   indices,
+  //   wireIndices,
+  //   numTris,
+  //   maxZ
+  // }
 }

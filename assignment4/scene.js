@@ -1,5 +1,5 @@
 function Scene(gl) {
-  this.objects = []
+  this.entities = []
   this.lights = []
   this.blendFuncStack = [{s: gl.ONE, d: gl.NONE}]
   this.camera = null
@@ -33,20 +33,21 @@ Scene.prototype.getModelMatrix = function() {
 }
 
 Scene.prototype.draw = function(gl) {
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   this.pushBlendFunc(gl, {s: gl.ONE, d: gl.NONE})
-  this.objects.forEach((object) => {
-    this._drawInner(gl, object)
+  this.entities.forEach((entity) => {
+    this._drawInner(gl, entity)
   })
   this.popBlendFunc(gl)
 }
 
-Scene.prototype._drawInner = function(gl, object) {
-  object.bind(gl)
+Scene.prototype._drawInner = function(gl, entity) {
+  entity.bind(gl)
   this.lights.forEach((light) => {
     light.sendData(gl)
-    object.draw(gl)
+    entity.draw(gl)
   })
-  object.children.forEach(child => this._drawInner(gl, child))
+  entity.children.forEach(child => this._drawInner(gl, child))
 }
 
 
