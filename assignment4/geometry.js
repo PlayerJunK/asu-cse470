@@ -47,7 +47,6 @@ Geometry.prototype.sendData = function (gl) {
 }
 
 Geometry.prototype.enableAttributes = function (gl, locs) {
-  console.log(locs)
   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
   gl.vertexAttribPointer(locs.position, 4, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(locs.position)

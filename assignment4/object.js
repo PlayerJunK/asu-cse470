@@ -1,9 +1,8 @@
 // HW470: Create a Transform type that will allow easy ability to rotate and translate a cube instance
 function Transform(x, y, z) {
   this.rotation = rotateX(0)
-  this.center = translate(-0.5, -0.5, 0.5)
   this.translation = translate(x, y, z)
-  this.transform = translate(0, 0, 0)
+  this.transform = this.translation
   this.scaling = scalem(1, 1, 1)
 }
 
@@ -13,7 +12,7 @@ Transform.prototype.computeTransform = function () {
   //
   // Scaling and rotation are performed about the center of the cube by first translating
   // in the opposite vector
-  this.transform = mult(this.translation, mult(mult(this.scaling, this.rotation), this.center))
+  this.transform = mult(this.translation, mult(this.scaling, this.rotation))
 }
 
 Transform.prototype.getTransform = function () {
@@ -46,9 +45,13 @@ PhongConstants.prototype.asVec = function () {
   return vec4(this.ka, this.kd, this.ks, this.s)
 }
 
-function PhongMaterial(gl, props) {
-  this.kind = 'phong'
-  this.shaderProgram = SHADER_PROGRAMS.PHONG
+function PhongMaterial(gl, props, kind) {
+  this.kind = kind
+  if (this.kind === 'gourad') {
+    this.shaderProgram = SHADER_PROGRAMS.GOURAD
+  } else {
+    this.shaderProgram = SHADER_PROGRAMS.PHONG
+  }
   this.props = props
 }
 

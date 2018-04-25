@@ -341,6 +341,7 @@ window.onload = function init() {
   mvMatrix = lookAt(vec3(viewer.eye), viewer.at, viewer.up);
   console.log(`Initial perspective options: \nfovy: ${perspOptions.fovy}, aspect: ${perspOptions.aspect}, near: ${perspOptions.near}, far: ${perspOptions.far}`);
   projMatrix = perspective(perspOptions.fovy, perspOptions.aspect, perspOptions.near, perspOptions.far);
+  console.log(projMatrix);
 
   u_projMatrixLoc = gl.getUniformLocation( program1, "u_projMatrix" );
   u_mvMatrixLoc = gl.getUniformLocation( program1, "u_mvMatrix" );

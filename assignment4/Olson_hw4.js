@@ -63,7 +63,7 @@ function init() {
     'matAmb', 'matDif', 'matSpec', 'constants',
     'lightPosition', 'lightColor'
   ]);
-  SHADER_PROGRAMS.PHONG = createShaderProgram(gl, "vertex-gourad", "fragment-basic", [
+  SHADER_PROGRAMS.GOURAD = createShaderProgram(gl, "vertex-gourad", "fragment-basic", [
     'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix',
     'matAmb', 'matDif', 'matSpec', 'constants',
     'lightPosition', 'lightColor'
@@ -76,7 +76,7 @@ function init() {
   var potGeo = surfaceOfRevolution(surfaceRevOptions.MYSURFACE, blueGenerator, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
 
   scene = new Scene(gl);
-  scene.camera = new Camera(new Transform(0,0,-1), 65, canvas.width/canvas.height, 0.1, 50);
+  scene.camera = new Camera(new Transform(0,0,0), 65, canvas.width/canvas.height, 0.1, 50);
   let light = new Light(vec4(2,2,2,1), vec3(1,1,1));
   scene.lights.push(light);
 
@@ -85,7 +85,7 @@ function init() {
     diffuse: vec3(0.6, 0.6, 0.8),
     specular: vec3(1,1,1),
     constants: new PhongConstants(1.0, 1.0, 0.6, 500)
-  })
+  }, 'gourad')
   let entity = new Entity(gl, cylinderGeo, mat)
 
   scene.entities.push(entity)
@@ -98,6 +98,6 @@ window.onload = init
 function render() {
   scene.draw(gl)
   // HW470: Get next availale frame and run this function again
-  // window.requestAnimationFrame(render);
+  //window.requestAnimationFrame(render);
 }
 

@@ -84,8 +84,7 @@ uniform vec3 lightColor;
 uniform vec3 matAmb;
 uniform vec3 matDif;
 uniform vec3 matSpec;
-uniform vec3 constants;
-uniform float shininess;
+uniform vec4 constants;
 
 //HW470: MVP matrices
 uniform mat4 u_projMatrix; 
@@ -111,6 +110,7 @@ void main()
     float Ka = constants.x;
     float Kd = constants.y;
     float Ks = constants.z;
+    float shininess = constants.w;
 
     // ambient
     vec3 ambient = Ka * matAmb;
@@ -127,17 +127,16 @@ void main()
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
     // sum, divide by distance squared
-    fColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
+    //fColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
+    fColor = vec4(1.0,0.0,0.0,1.0);
     
-    gl_Position = u_projMatrix * (mvMatrix * a_vertexPosition);
+    gl_Position = mvMatrix * a_vertexPosition;
 }
 </script>
 
 <script id="vertex-phong" type="x-shader/x-vertex">
-precision mediump float;
 //HW470: Vertex shader for phong shading
 attribute vec4 a_vertexPosition;
-attribute vec4 a_vertexColor;
 attribute vec4 a_vertexNormal;
 attribute vec2 a_texCoord;
 
@@ -164,7 +163,7 @@ void main()
 </script>
 
 <script id="fragment-phong" type="x-shader/x-vertex">
-precision mediump float;
+precision highp float;
 //HW470: Vertex attributes varied
 varying vec4 v_vertexPosition;
 varying vec4 v_vertexNormal;

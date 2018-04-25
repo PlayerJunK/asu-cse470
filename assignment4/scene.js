@@ -33,10 +33,11 @@ Scene.prototype.getModelMatrix = function() {
   return this.modelMatrixStack[this.modelMatrixStack.length - 1]
 }
 
-Scene.prototype.sendMvpUniforms = function(gl, shaderProgram) {
-  gl.uniformMatrix4fv(shaderProgram.u_projMatrixLoc, false, flatten(this.camera.projectionMatrix));
-  gl.uniformMatrix4fv(shaderProgram.u_viewMatrixLoc, false, flatten(this.camera.viewMatrix));
-  gl.uniformMatrix4fv(shaderProgram.u_modelMatrixLoc, false, flatten(this.getModelMatrix()));
+Scene.prototype.sendMvpUniforms = function(gl, locs) {
+  console.log(locs)
+  gl.uniformMatrix4fv(locs.u_projMatrix, false, flatten(this.camera.projectionMatrix));
+  gl.uniformMatrix4fv(locs.u_viewMatrix, false, flatten(this.camera.viewMatrix));
+  gl.uniformMatrix4fv(locs.u_modelMatrix, false, flatten(this.getModelMatrix()));
 }
 
 Scene.prototype.draw = function(gl) {
@@ -54,6 +55,7 @@ Scene.prototype._drawInner = function(gl, entity) {
   this.sendMvpUniforms(gl, entity.material.shaderProgram.locs)
   this.lights.forEach((light) => {
     light.sendData(gl, entity.material.shaderProgram.locs)
+    console.log(gl.getUniform(entity.material.shaderProgram, entity.material.shaderProgram.locs.u_modelMatrix))
     entity.draw(gl)
   })
   entity.children.forEach(child => this._drawInner(gl, child))
