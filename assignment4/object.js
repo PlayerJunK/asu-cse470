@@ -48,20 +48,15 @@ PhongConstants.prototype.asVec = function () {
 
 function PhongMaterial(gl, props) {
   this.kind = 'phong'
+  this.shaderProgram = SHADER_PROGRAMS.PHONG
   this.props = props
-  this.locs = {
-    matAmb: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'matAmb'),
-    matDif: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'matDif'),
-    matSpec: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'matSpec'),
-    constants: gl.getUniformLocation(SHADER_PROGRAMS.PHONG, 'constants'),
-  }
 }
 
 PhongMaterial.prototype.sendData = function (gl) {
-  gl.uniform3fv(this.locs.matAmb, flatten(this.props.ambient));
-  gl.uniform3fv(this.locs.matDif, flatten(this.props.diffuse));
-  gl.uniform3fv(this.locs.matSpec, flatten(this.props.specular));
-  gl.uniform4fv(this.locs.constants, flatten(this.props.constants.asVec()));
+  gl.uniform3fv(this.shaderProgram.locs.matAmb, flatten(this.props.ambient));
+  gl.uniform3fv(this.shaderProgram.locs.matDif, flatten(this.props.diffuse));
+  gl.uniform3fv(this.shaderProgram.locs.matSpec, flatten(this.props.specular));
+  gl.uniform4fv(this.shaderProgram.locs.constants, flatten(this.props.constants.asVec()));
 }
 
 function BasicMaterial(properties) {
@@ -112,7 +107,7 @@ Entity.prototype.sendData = function (gl) {
 
 Entity.prototype.bind = function(gl) {
   gl.useProgram(this.material.shaderProgram)
-  this.geometry.enableAttributes(gl, this.material.locs)
+  this.geometry.enableAttributes(gl, this.material.shaderProgram.locs)
 }
 
 Entity.prototype.draw = function (gl) {

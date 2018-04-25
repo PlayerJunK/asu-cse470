@@ -31,6 +31,20 @@ function mult4(mat, vec) {
   return result;
 }
 
+function createShaderProgram(gl, vShader, fragShader, uniformNames) {
+  let program = initShaders(gl, vShader, fragShader)
+  gl.useProgram(program)
+  program.locs = {}
+  uniformNames.forEach(name => {
+    program.locs[name] = gl.getUniformLocation(program, name)
+  })
+  program.locs.position = gl.getAttribLocation(program, 'a_vertexPosition')
+  program.locs.color = gl.getAttribLocation(program, 'a_vertexColor')
+  program.locs.normal = gl.getAttribLocation(program, 'a_vertexNormal')
+  program.locs.texCoord = gl.getAttribLocation(program, 'a_texCoord')
+  return program
+}
+
 function init() {
   canvas = document.getElementById("gl-canvas");
 
@@ -41,9 +55,19 @@ function init() {
   gl.clearColor(0.12, 0.1, 0.15, 1.0);
   gl.enable(gl.DEPTH_TEST);
 
-  SHADER_PROGRAMS.BASIC = initShaders(gl, "vertex-basic", "fragment-basic");
-  SHADER_PROGRAMS.PHONG = initShaders(gl, "vertex-phong", "fragment-phong");
-  SHADER_PROGRAMS.GOURAD = initShaders(gl, "vertex-gourad", "fragment-basic");
+  SHADER_PROGRAMS.BASIC = createShaderProgram(gl, "vertex-basic", "fragment-basic", [
+    'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix'
+  ]);
+  SHADER_PROGRAMS.PHONG = createShaderProgram(gl, "vertex-phong", "fragment-phong", [
+    'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix',
+    'matAmb', 'matDif', 'matSpec', 'constants',
+    'lightPosition', 'lightColor'
+  ]);
+  SHADER_PROGRAMS.PHONG = createShaderProgram(gl, "vertex-gourad", "fragment-basic", [
+    'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix',
+    'matAmb', 'matDif', 'matSpec', 'constants',
+    'lightPosition', 'lightColor'
+  ]);
 
   //HW470 Create the geometry for cylinder
   var cylinderGeo = surfaceOfRevolution(surfaceRevOptions.CYLINDER, blueGenerator, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
@@ -53,6 +77,8 @@ function init() {
 
   scene = new Scene(gl);
   scene.camera = new Camera(new Transform(0,0,-1), 65, canvas.width/canvas.height, 0.1, 50);
+  let light = new Light(vec4(2,2,2,1), vec3(1,1,1));
+  scene.lights.push(light);
 
   let mat = new PhongMaterial(gl, {
     ambient: vec3(0.1, 0.1, 0.2),
@@ -60,7 +86,7 @@ function init() {
     specular: vec3(1,1,1),
     constants: new PhongConstants(1.0, 1.0, 0.6, 500)
   })
-  let entity = new Entity(gl, potGeo, mat)
+  let entity = new Entity(gl, cylinderGeo, mat)
 
   scene.entities.push(entity)
 
@@ -72,6 +98,6 @@ window.onload = init
 function render() {
   scene.draw(gl)
   // HW470: Get next availale frame and run this function again
-  window.requestAnimationFrame(render);
+  // window.requestAnimationFrame(render);
 }
 

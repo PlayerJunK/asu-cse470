@@ -33,7 +33,8 @@ varying vec4 fColor;
 
 //HW470: Define the projection and modelview matrices as uniforms
 uniform mat4 u_projMatrix;
-uniform mat4 u_mvMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
 
 void main()
 {
@@ -41,7 +42,7 @@ void main()
     fColor = a_vertexColor;
     // HW470: Set final position by translating the original vertex position by the modelview matrix
     // then the projection matrix
-    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+    gl_Position = u_projMatrix * (u_viewMatrix * (u_modelMatrix * a_vertexPosition));
 }
 </script>
 
@@ -51,14 +52,15 @@ attribute vec4 a_vertexPosition;
 
 varying vec4 fColor;
 
-uniform mat4 u_mvMatrix; 
 uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
 void main()
 {
     //HW470: Color always white
     fColor = vec4(1.0);
     //HW470: transform based on mv/p matrices
-    gl_Position = u_projMatrix * u_mvMatrix * vPosition;
+    gl_Position = u_projMatrix * u_viewMatrix * u_modelMatrix * vPosition;
     //HW470 scale point size based on perspective division
     //component so that it gets larget and smaller as it goes
     //towards and away the viewer
@@ -70,6 +72,7 @@ void main()
 <script id="vertex-gourad" type="x-shader/x-vertex">
 //HW470: Vertex attributes
 attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexColor;
 attribute vec4 a_vertexNormal;
 attribute vec2 a_texCoord;
             
@@ -85,22 +88,24 @@ uniform vec3 constants;
 uniform float shininess;
 
 //HW470: MVP matrices
-uniform mat4 u_mvMatrix; 
 uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
 
 varying vec4 fColor;
 
 void main()
 {   
+    mat4 mvMatrix = u_viewMatrix * u_modelMatrix;
     vec3 eye = vec3(0.0, 0.0, 0.0);
-    vec3 position = (u_mvMatrix * a_vertexPosition).xyz;
-    vec3 light = (u_mvMatrix * lightPosition).xyz;
+    vec3 position = (mvMatrix * a_vertexPosition).xyz;
+    vec3 light = (mvMatrix * lightPosition).xyz;
     vec3 lVec = light - position;
     float lMagSqr = dot(lVec, lVec);
     vec3 L = lVec / sqrt(lMagSqr);
     vec3 E = normalize(eye - position);
     vec3 R = normalize(L + E);
-    vec3 N = normalize( (u_mvMatrix * a_vertexNormal).xyz);
+    vec3 N = normalize( (mvMatrix * a_vertexNormal).xyz);
                      
     // Compute lighting
     float Ka = constants.x;
@@ -112,19 +117,19 @@ void main()
 
     // diffuse
     float d = max(dot(L, N), 0.0);
-    vec3 diffuse = Kd * d / lMagSqr * (matDif * lightColor);
+    vec3 diffuse = Kd * d * (matDif * lightColor);
 
     // specular
     float s = pow(max(dot(N, R), 0.0), shininess);
-    vec3 specular = Ks * s / lMagSqr * (matSpec * lightColor);
+    vec3 specular = Ks * s * (matSpec * lightColor);
 
     // No specular highlighting on the back			 
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
-    // sum
-    fColor = vec4(ambient + diffuse + specular, 1.0);
+    // sum, divide by distance squared
+    fColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
     
-    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+    gl_Position = u_projMatrix * (mvMatrix * a_vertexPosition);
 }
 </script>
 
@@ -132,6 +137,7 @@ void main()
 precision mediump float;
 //HW470: Vertex shader for phong shading
 attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexColor;
 attribute vec4 a_vertexNormal;
 attribute vec2 a_texCoord;
 
@@ -141,8 +147,9 @@ varying vec4 v_vertexNormal;
 varying vec2 v_texCoord;
 
 //HW470: MVP matrices
-uniform mat4 u_mvMatrix; 
 uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
 
 void main()
 {
@@ -152,7 +159,7 @@ void main()
 
     // HW470: Set final position by translating the original vertex position by the modelview matrix
     // then the projection matrix
-    gl_Position = u_projMatrix * (u_mvMatrix * a_vertexPosition);
+    gl_Position = u_projMatrix * u_viewMatrix * u_modelMatrix * a_vertexPosition;
 }
 </script>
 
@@ -174,20 +181,22 @@ uniform vec3 matSpec;
 uniform vec4 constants;
 
 //HW470: MVP matrices
-uniform mat4 u_mvMatrix; 
 uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
 
 void main()
 {   
+    mat4 mvMatrix = u_viewMatrix * u_modelMatrix;
     vec3 eye = vec3(0.0, 0.0, 0.0);
-    vec3 position = (u_mvMatrix * v_vertexPosition).xyz;
-    vec3 light = (u_mvMatrix * lightPosition).xyz;
+    vec3 position = (mvMatrix * v_vertexPosition).xyz;
+    vec3 light = (mvMatrix * lightPosition).xyz;
     vec3 lVec = light - position;
     float lMagSqr = dot(lVec, lVec);
     vec3 L = lVec / sqrt(lMagSqr);
     vec3 E = normalize(eye - position);
     vec3 R = normalize(L + E);
-    vec3 N = normalize((u_mvMatrix * v_vertexNormal).xyz);
+    vec3 N = normalize((mvMatrix * v_vertexNormal).xyz);
                      
     // Compute lighting
     float Ka = constants.x;
@@ -200,17 +209,18 @@ void main()
 
     // diffuse
     float d = max(dot(L, N), 0.0);
-    vec3 diffuse = Kd * d / lMagSqr * (matDif * lightColor);
+    vec3 diffuse = Kd * d * (matDif * lightColor);
 
     // specular
     float s = pow(max(dot(N, R), 0.0), shininess);
-    vec3 specular = Ks * s / lMagSqr * (matSpec * lightColor);
+    vec3 specular = Ks * s * (matSpec * lightColor);
 
     // No specular highlighting on the back			 
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
     // sum
-    gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
+    //gl_FragColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 </script>
 

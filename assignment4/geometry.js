@@ -47,23 +47,24 @@ Geometry.prototype.sendData = function (gl) {
 }
 
 Geometry.prototype.enableAttributes = function (gl, locs) {
+  console.log(locs)
   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
   gl.vertexAttribPointer(locs.position, 4, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(locs.position)
 
-  if (typeof locs.color !== 'undefined') {
+  if (locs.color !== -1) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color)
     gl.vertexAttribPointer(locs.color, 4, gl.FLOAT, false, 0, 0)
     gl.enableVertexAttribArray(locs.color)
   }
 
-  if (typeof locs.normal !== 'undefined') {
+  if (locs.normal !== -1) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normal)
     gl.vertexAttribPointer(locs.normal, 4, gl.FLOAT, false, 0, 0)
     gl.enableVertexAttribArray(locs.normal)
   }
 
-  if (typeof locs.texCoord !== 'undefined') {
+  if (locs.texCoord !== -1) {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.texCoord)
     gl.vertexAttribPointer(locs.texCoord, 2, gl.FLOAT, false, 0, 0)
     gl.enableVertexAttribArray(locs.texCoord)
@@ -74,8 +75,8 @@ Geometry.prototype.enableAttributes = function (gl, locs) {
 // input params go in call to makeSurfRev
 var surfaceRevOptions = 
   {
-    tessGenDir: 40,
-    tessRotDir: 80,
+    tessGenDir: 3,
+    tessRotDir: 2,
 
     inputChoice: 0,	
     // HW470: Each of these is an object, the structure is explained below
