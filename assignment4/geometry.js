@@ -159,7 +159,7 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
     let gen = surfaceGenerator.curve(t);
     maxZ = Math.max(maxZ, gen);
     const baseVec = vec4(gen, t, 0, 1);
-    for (let theta = 0; theta < 360; theta += 360 / tesselationRotDir) {
+    for (let theta = 0; theta <= 360; theta += 360 / tesselationRotDir) {
       const rot = rotateY(theta)
       let vert = multMatVec(rot, baseVec);
       let slope = surfaceGenerator.derivative(t);
@@ -167,7 +167,9 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
       vertices.push(vert);
       normals.push(norm);
       colors.push(colorGenerator(theta, t));
-      texCoords.push(vec2(theta/360, (t + 1) / 0.5));
+      let ss = theta/360 * 2 * Math.PI
+      let tt = (t + 1) / 2
+      texCoords.push(vec2(ss * 2, tt * 2));
       normalDrawVerts.push(vert);
       normalDrawVerts.push(add(vert, scale(0.1, norm)));
     }
@@ -181,8 +183,8 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
   for (let i = 0; i < tesselationFnDir; i++) {
     for (let j = 0; j < tesselationRotDir; j++) {
       let quadIndices = [
-        (tesselationRotDir) * (i) + j, (tesselationRotDir) * (i) + (j + 1) % tesselationRotDir,
-        (tesselationRotDir) * (i + 1) + j, (tesselationRotDir) * (i+1) + (j + 1) % tesselationRotDir
+        (tesselationRotDir + 1) * (i) + j, (tesselationRotDir + 1) * (i) + (j + 1),
+        (tesselationRotDir + 1) * (i + 1) + j, (tesselationRotDir + 1) * (i+1) + (j + 1)
       ];
       for (let k = 0; k < wireSubIndices.length; k++) {
         wireIndices.push(quadIndices[wireSubIndices[k]])
@@ -194,13 +196,4 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
     }
   }
   return new Geometry(vertices, colors, normals, texCoords, indices)
-  // return {
-  //   vertices,
-  //   normals,
-  //   normalDrawVerts,
-  //   indices,
-  //   wireIndices,
-  //   numTris,
-  //   maxZ
-  // }
 }

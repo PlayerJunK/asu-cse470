@@ -45,14 +45,33 @@ PhongConstants.prototype.asVec = function () {
   return vec4(this.ka, this.kd, this.ks, this.s)
 }
 
-function PhongMaterial(gl, props, kind) {
-  this.kind = kind
-  if (this.kind === 'gourad') {
-    this.shaderProgram = SHADER_PROGRAMS.GOURAD
+function PhongMaterial(gl, props, texturePath) {
+  if (typeof texturePath !== 'undefined') {
+    this.shaderProgram = SHADER_PROGRAMS.PHONG_TEXTURED
+    this.texturePath = texturePath
+    this.loadTexture()
   } else {
     this.shaderProgram = SHADER_PROGRAMS.PHONG
   }
   this.props = props
+}
+
+PhongMaterial.prototype.loadTexture = function() {
+  this.textureImage = new Image();
+  this.textureImage.onload = this.configureTexture.bind(this)
+  this.textureImage.src = this.texturePath;
+}
+
+PhongMaterial.prototype.configureTexture = function() {
+  this.texture = gl.createTexture();
+  gl.bindTexture( gl.TEXTURE_2D, this.texture );
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
+       gl.RGB, gl.UNSIGNED_BYTE, this.textureImage );
+  gl.generateMipmap( gl.TEXTURE_2D );
+  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, 
+                    gl.NEAREST_MIPMAP_LINEAR );
+  gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 }
 
 PhongMaterial.prototype.sendData = function (gl) {
@@ -60,6 +79,8 @@ PhongMaterial.prototype.sendData = function (gl) {
   gl.uniform3fv(this.shaderProgram.locs.matDif, flatten(this.props.diffuse));
   gl.uniform3fv(this.shaderProgram.locs.matSpec, flatten(this.props.specular));
   gl.uniform4fv(this.shaderProgram.locs.constants, flatten(this.props.constants.asVec()));
+  gl.bindTexture( gl.TEXTURE_2D, this.texture );
+  gl.uniform1i(this.shaderProgram.locs.u_texture, 0);
 }
 
 function BasicMaterial(properties) {
