@@ -212,3 +212,66 @@ function planeY(w,l,texRepeat) {
   let indices = [0,1,2,2,1,3];
   return new Geometry(vertices, colors, normals, texCoords, indices)
 }
+
+function cube(w, l, h, texRepeat) {
+  let vertices = [
+    // top face
+    vec4(-w/2, h/2, l/2, 1), vec4(w/2, h/2, l/2, 1),
+    vec4(-w/2, h/2, -l/2, 1), vec4(w/2, h/2, -l/2, 1),
+    // bottom face
+    vec4(-w/2, -h/2, l/2, 1), vec4(w/2, -h/2, l/2, 1),
+    vec4(-w/2, -h/2, -l/2, 1), vec4(w/2, -h/2, -l/2, 1),
+    // left face
+    vec4(-w/2, h/2, l/2, 1), vec4(-w/2, h/2, -l/2, 1),
+    vec4(-w/2, -h/2, l/2, 1), vec4(-w/2, -h/2, -l/2, 1),
+    // right face
+    vec4(w/2, h/2, l/2, 1), vec4(w/2, h/2, -l/2, 1),
+    vec4(w/2, -h/2, l/2, 1), vec4(w/2, -h/2, -l/2, 1),
+    // front face
+    vec4(-w/2, h/2, l/2, 1), vec4(w/2, h/2, l/2, 1),
+    vec4(-w/2, -h/2, l/2, 1), vec4(w/2, -h/2, l/2, 1),
+    // back face
+    vec4(-w/2, h/2, -l/2, 1), vec4(w/2, h/2, -l/2, 1),
+    vec4(-w/2, -h/2, -l/2, 1), vec4(w/2, -h/2, -l/2, 1),
+  ]
+  let normals = [
+    vec4(0, 1, 0, 0), vec4(0, 1, 0, 0), vec4(0, 1, 0, 0), vec4(0, 1, 0, 0),
+    vec4(0, -1, 0, 0), vec4(0, -1, 0, 0), vec4(0, -1, 0, 0), vec4(0, -1, 0, 0),
+    vec4(-1, 0, 0, 0), vec4(-1, 0, 0, 0), vec4(-1, 0, 0, 0), vec4(-1, 0, 0, 0),
+    vec4(1, 0, 0, 0), vec4(1, 0, 0, 0), vec4(1, 0, 0, 0), vec4(1, 0, 0, 0),
+    vec4(0, 0, 1, 0), vec4(0, 0, 1, 0), vec4(0, 0, 1, 0), vec4(0, 0, 1, 0),
+    vec4(0, 0, -1, 0), vec4(0, 0, -1, 0), vec4(0, 0, -1, 0), vec4(0, 0, -1, 0)
+  ]
+  let colors = [
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+    vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0),
+  ]
+  let texCoords = [
+    vec2(0, texRepeat), vec2(texRepeat * w/l, texRepeat),
+    vec2(0, 0), vec2(texRepeat * w/l, 0),
+    vec2(0, texRepeat), vec2(texRepeat * w/l, texRepeat),
+    vec2(0, 0), vec2(texRepeat * w/l, 0),
+    vec2(0, texRepeat), vec2(texRepeat * l/h, texRepeat),
+    vec2(0, 0), vec2(texRepeat * l/h, 0),
+    vec2(0, texRepeat), vec2(texRepeat * l/h, texRepeat),
+    vec2(0, 0), vec2(texRepeat * l/h, 0),
+    vec2(0, texRepeat), vec2(texRepeat * w/h, texRepeat),
+    vec2(0, 0), vec2(texRepeat * w/h, 0),
+    vec2(0, texRepeat), vec2(texRepeat * w/h, texRepeat),
+    vec2(0, 0), vec2(texRepeat * w/h, 0)
+  ]
+  let indices = []
+  for (let i = 0; i < 6; i++) {
+    indices.push(0 + i * 4)
+    indices.push(1 + i * 4)
+    indices.push(2 + i * 4)
+    indices.push(2 + i * 4)
+    indices.push(1 + i * 4)
+    indices.push(3 + i * 4)
+  }
+  return new Geometry(vertices, colors, normals, texCoords, indices)
+}
