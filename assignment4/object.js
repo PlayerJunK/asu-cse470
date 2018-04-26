@@ -133,6 +133,7 @@ Entity.prototype.bind = function(gl) {
   gl.useProgram(this.material.shaderProgram)
   this.material.sendData(gl)
   this.geometry.enableAttributes(gl, this.material.shaderProgram.locs)
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.geometry.buffers.index)
 }
 
 Entity.prototype.draw = function (gl) {

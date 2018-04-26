@@ -197,3 +197,18 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
   }
   return new Geometry(vertices, colors, normals, texCoords, indices)
 }
+
+function planeY(w,l,texRepeat) {
+  let vertices = [
+    vec4(-w/2, 0, l/2, 1), vec4(w/2, 0, l/2, 1),
+    vec4(-w/2, 0, -l/2, 1), vec4(w/2, 0, -l/2, 1)
+  ]
+  let normals = [vec4(0, 1, 0, 0), vec4(0, 1, 0, 0), vec4(0, 1, 0, 0), vec4(0, 1, 0, 0)]
+  let colors = [vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0)]
+  let texCoords = [
+    vec2(0, texRepeat), vec2(texRepeat * w/l, texRepeat),
+    vec2(0, 0), vec2(texRepeat * w/l, 0)
+  ]
+  let indices = [0,1,2,2,1,3];
+  return new Geometry(vertices, colors, normals, texCoords, indices)
+}

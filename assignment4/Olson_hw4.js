@@ -75,6 +75,18 @@ function init() {
   pot.transform.computeTransform()
   scene.entities.push(pot)
 
+  let planeMat = new PhongMaterial(gl, {
+    ambient: vec3(0.05, 0.055, 0.09),
+    diffuse: vec3(0.4, 0.4, 0.85),
+    specular: vec3(1,1,1),
+    constants: new PhongConstants(1.0, 1.0, 0.1, 10)
+  }, 'ground.jpg')
+  let plane = new Entity(gl, planeY(2, 1, 3), planeMat)
+  plane.transform.setScale(3)
+  plane.transform.translate(0,-1,0)
+  plane.transform.computeTransform()
+  scene.entities.push(plane)
+
   render();
 }
 
