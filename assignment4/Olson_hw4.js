@@ -86,7 +86,7 @@ function init() {
     ambient: vec3(0.05, 0.055, 0.09),
     diffuse: vec3(0.4, 0.4, 0.85),
     specular: vec3(1,1,1),
-    constants: new PhongConstants(1.0, 1.0, 0.4, 100)
+    constants: new PhongConstants(1.0, 1.0, 0.2, 100)
   }, 'phong')
   let cylinder = new Entity(gl, cylinderGeo, cylinderMat)
   cylinder.transform.translate(-2.25, 0, 0)
@@ -95,9 +95,9 @@ function init() {
 
   let potMat = new PhongMaterial(gl, {
     ambient: vec3(0.08, 0.0625, 0.09),
-    diffuse: vec3(0.85, 0.4, 0.4),
-    specular: vec3(1, 0.75, 0.75),
-    constants: new PhongConstants(1.0, 1.0, 0.4, 100)
+    diffuse: vec3(0.85, 0.45, 0.4),
+    specular: vec3(0.8, 0.35, 0.3),
+    constants: new PhongConstants(1.0, 1.0, 0.8, 100)
   }, 'phong')
   let pot = new Entity(gl, potGeo, potMat)
   pot.transform.translate(2.25, 0, 0)
@@ -110,9 +110,9 @@ function init() {
 window.onload = init
 
 function render() {
-  scene.camera.transform = new Transform(4 * Math.sin(frames / 250), Math.sin(frames/500), 4 * Math.cos(frames / 250))
+  scene.camera.transform = new Transform(4 * Math.sin(frames / 250), 2 * Math.sin(frames/500), 2 * Math.cos(frames / 250))
   scene.camera.transform.rotate(frames / 250 * 360 / (2 * Math.PI), vec3(0,1,0))
-  scene.camera.transform.rotate(-20 * Math.sin(frames / 500), vec3(1,0,0))
+  scene.camera.transform.rotate(-40 * Math.sin(frames / 500), vec3(1,0,0))
   scene.camera.computeView()
   scene.lights[0].position = vec4(0, Math.sin(frames/100), 1, 1)
   scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)

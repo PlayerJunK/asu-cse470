@@ -8,7 +8,7 @@ function Scene(gl) {
   gl.clearColor(0.12, 0.1, 0.15, 1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND)
-  gl.enable(gl.CULL_FACE)
+  // gl.enable(gl.CULL_FACE)
   gl.depthFunc(gl.LEQUAL)
 }
 
