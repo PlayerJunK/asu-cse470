@@ -4,6 +4,12 @@ function Scene(gl) {
   this.blendFuncStack = [{s: gl.ONE, d: gl.NONE}]
   this.camera = null
   this.modelMatrixStack = [translate(0,0,0)]
+
+  gl.clearColor(0.12, 0.1, 0.15, 1.0);
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND)
+  gl.enable(gl.CULL_FACE)
+  gl.depthFunc(gl.LEQUAL)
 }
 
 Scene.prototype.pushBlendFunc = function(gl, params) {
@@ -34,7 +40,7 @@ Scene.prototype.getModelMatrix = function() {
 }
 
 Scene.prototype.sendMvpUniforms = function(gl, locs) {
-  console.log(locs)
+  //console.log(locs)
   gl.uniformMatrix4fv(locs.u_projMatrix, false, flatten(this.camera.projectionMatrix));
   gl.uniformMatrix4fv(locs.u_viewMatrix, false, flatten(this.camera.viewMatrix));
   gl.uniformMatrix4fv(locs.u_modelMatrix, false, flatten(this.getModelMatrix()));
@@ -42,23 +48,27 @@ Scene.prototype.sendMvpUniforms = function(gl, locs) {
 
 Scene.prototype.draw = function(gl) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  // this.pushBlendFunc(gl, {s: gl.ONE, d: gl.NONE})
   this.entities.forEach((entity) => {
     this._drawInner(gl, entity)
   })
-  // this.popBlendFunc(gl)
 }
 
 Scene.prototype._drawInner = function(gl, entity) {
   entity.bind(gl)
-  this.pushModelMatrix(mult(this.getModelMatrix(), entity.transform.transform))
+  this.pushModelMatrix(mult(entity.transform.transform, this.getModelMatrix()))
   this.sendMvpUniforms(gl, entity.material.shaderProgram.locs)
-  this.lights.forEach((light) => {
+  gl.uniform1f(entity.material.shaderProgram.locs.numLights, this.lights.length)
+  this.lights.forEach((light, i) => {
+    if (i === 1) {
+      this.pushBlendFunc(gl, {s: gl.ONE, d: gl.ONE})
+    }
     light.sendData(gl, entity.material.shaderProgram.locs)
-    console.log(gl.getUniform(entity.material.shaderProgram, entity.material.shaderProgram.locs.u_modelMatrix))
+    //console.log(gl.getUniform(entity.material.shaderProgram, entity.material.shaderProgram.locs.lightPosition))
     entity.draw(gl)
   })
+  this.popBlendFunc(gl)
   entity.children.forEach(child => this._drawInner(gl, child))
+  this.popModelMatrix()
 }
 
 

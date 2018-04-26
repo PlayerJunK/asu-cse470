@@ -74,8 +74,8 @@ Geometry.prototype.enableAttributes = function (gl, locs) {
 // input params go in call to makeSurfRev
 var surfaceRevOptions = 
   {
-    tessGenDir: 3,
-    tessRotDir: 2,
+    tessGenDir: 30,
+    tessRotDir: 30,
 
     inputChoice: 0,	
     // HW470: Each of these is an object, the structure is explained below
@@ -176,7 +176,7 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
   // 1 = top right,
   // 2 = bottom left,
   // 3 = botom right
-  const subIndices = [1,0,2,2,1,3];
+  const subIndices = [0,1,2,2,1,3];
   const wireSubIndices = [1,0,0,2,2,1,1,3,3,2];
   for (let i = 0; i < tesselationFnDir; i++) {
     for (let j = 0; j < tesselationRotDir; j++) {

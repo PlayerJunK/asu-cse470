@@ -21,7 +21,7 @@ Transform.prototype.getTransform = function () {
 
 Transform.prototype.rotate = function (theta, axis) {
   // HW470: Rotate existing rotation matrix by specified theta and axis
-  this.rotation = mult(rotate(theta, axis), this.rotation)
+  this.rotation = mult(this.rotation, rotate(theta, axis))
 }
 
 Transform.prototype.setScale = function (scale) {
@@ -110,6 +110,7 @@ Entity.prototype.sendData = function (gl) {
 
 Entity.prototype.bind = function(gl) {
   gl.useProgram(this.material.shaderProgram)
+  this.material.sendData(gl)
   this.geometry.enableAttributes(gl, this.material.shaderProgram.locs)
 }
 

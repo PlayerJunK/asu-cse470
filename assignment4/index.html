@@ -127,10 +127,10 @@ void main()
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
     // sum, divide by distance squared
-    //fColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
-    fColor = vec4(1.0,0.0,0.0,1.0);
+    fColor = vec4((ambient + diffuse + specular) / lMagSqr, 1.0);
+    //fColor = vec4(1.0,0.0,0.0,1.0);
     
-    gl_Position = mvMatrix * a_vertexPosition;
+    gl_Position = u_projMatrix * mvMatrix * a_vertexPosition;
 }
 </script>
 
@@ -172,6 +172,7 @@ varying vec2 v_texCoord;
 //HW470: Light attributes
 uniform vec4 lightPosition; 
 uniform vec3 lightColor;
+uniform float numLights;
 
 //HW470: Material attributes
 uniform vec3 matAmb;
@@ -189,7 +190,7 @@ void main()
     mat4 mvMatrix = u_viewMatrix * u_modelMatrix;
     vec3 eye = vec3(0.0, 0.0, 0.0);
     vec3 position = (mvMatrix * v_vertexPosition).xyz;
-    vec3 light = (mvMatrix * lightPosition).xyz;
+    vec3 light = (u_viewMatrix * lightPosition).xyz;
     vec3 lVec = light - position;
     float lMagSqr = dot(lVec, lVec);
     vec3 L = lVec / sqrt(lMagSqr);
@@ -204,7 +205,7 @@ void main()
     float shininess = constants.w;
 
     // ambient
-    vec3 ambient = Ka * matAmb;
+    vec3 ambient = Ka * matAmb / numLights;
 
     // diffuse
     float d = max(dot(L, N), 0.0);
@@ -218,8 +219,8 @@ void main()
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
     // sum
-    //gl_FragColor = vec4(vec3((ambient + diffuse + specular) / lMagSqr), 1.0);
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(vec3((diffuse + specular) / max(lMagSqr, 1.0)) + ambient, 1.0);
+    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 </script>
 

@@ -15,6 +15,8 @@ var staticData = {
   colors: []
 };
 
+var frames = 0;
+
 var SHADER_PROGRAMS = {};
 var scene;
 
@@ -52,8 +54,6 @@ function init() {
   if (!gl) { alert("WebGL isn't available"); }
 
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.12, 0.1, 0.15, 1.0);
-  gl.enable(gl.DEPTH_TEST);
 
   SHADER_PROGRAMS.BASIC = createShaderProgram(gl, "vertex-basic", "fragment-basic", [
     'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix'
@@ -61,7 +61,7 @@ function init() {
   SHADER_PROGRAMS.PHONG = createShaderProgram(gl, "vertex-phong", "fragment-phong", [
     'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix',
     'matAmb', 'matDif', 'matSpec', 'constants',
-    'lightPosition', 'lightColor'
+    'lightPosition', 'lightColor', 'numLights'
   ]);
   SHADER_PROGRAMS.GOURAD = createShaderProgram(gl, "vertex-gourad", "fragment-basic", [
     'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix',
@@ -76,19 +76,33 @@ function init() {
   var potGeo = surfaceOfRevolution(surfaceRevOptions.MYSURFACE, blueGenerator, surfaceRevOptions.tessGenDir, surfaceRevOptions.tessRotDir);
 
   scene = new Scene(gl);
-  scene.camera = new Camera(new Transform(0,0,0), 65, canvas.width/canvas.height, 0.1, 50);
-  let light = new Light(vec4(2,2,2,1), vec3(1,1,1));
-  scene.lights.push(light);
+  scene.camera = new Camera(new Transform(0,0,3), 65, canvas.width/canvas.height, 0.1, 50);
 
-  let mat = new PhongMaterial(gl, {
-    ambient: vec3(0.1, 0.1, 0.2),
-    diffuse: vec3(0.6, 0.6, 0.8),
+  scene.lights.push(new Light(vec4(1.5,0,1.5,1), vec3(1,1,1)))
+  scene.lights.push(new Light(vec4(1.5,0,-1.5,1), vec3(1,1,1)))
+  scene.lights.push(new Light(vec4(0,0,2,1), vec3(1,1,1)))
+
+  let cylinderMat = new PhongMaterial(gl, {
+    ambient: vec3(0.05, 0.055, 0.09),
+    diffuse: vec3(0.4, 0.4, 0.85),
     specular: vec3(1,1,1),
-    constants: new PhongConstants(1.0, 1.0, 0.6, 500)
-  }, 'gourad')
-  let entity = new Entity(gl, cylinderGeo, mat)
+    constants: new PhongConstants(1.0, 1.0, 0.4, 100)
+  }, 'phong')
+  let cylinder = new Entity(gl, cylinderGeo, cylinderMat)
+  cylinder.transform.translate(-2.25, 0, 0)
+  cylinder.transform.computeTransform()
+  scene.entities.push(cylinder)
 
-  scene.entities.push(entity)
+  let potMat = new PhongMaterial(gl, {
+    ambient: vec3(0.08, 0.0625, 0.09),
+    diffuse: vec3(0.85, 0.4, 0.4),
+    specular: vec3(1, 0.75, 0.75),
+    constants: new PhongConstants(1.0, 1.0, 0.4, 100)
+  }, 'phong')
+  let pot = new Entity(gl, potGeo, potMat)
+  pot.transform.translate(2.25, 0, 0)
+  pot.transform.computeTransform()
+  scene.entities.push(pot)
 
   render();
 }
@@ -96,8 +110,16 @@ function init() {
 window.onload = init
 
 function render() {
+  scene.camera.transform = new Transform(4 * Math.sin(frames / 250), Math.sin(frames/500), 4 * Math.cos(frames / 250))
+  scene.camera.transform.rotate(frames / 250 * 360 / (2 * Math.PI), vec3(0,1,0))
+  scene.camera.transform.rotate(-20 * Math.sin(frames / 500), vec3(1,0,0))
+  scene.camera.computeView()
+  scene.lights[0].position = vec4(0, Math.sin(frames/100), 1, 1)
+  scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)
+  scene.lights[2].position = vec4(-4.5 * Math.sin(frames / 100), 0.5, 1.5 * Math.cos(frames / 100), 1)
   scene.draw(gl)
   // HW470: Get next availale frame and run this function again
-  //window.requestAnimationFrame(render);
+  frames++;
+  window.requestAnimationFrame(render);
 }
 
