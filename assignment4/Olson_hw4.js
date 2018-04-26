@@ -81,8 +81,8 @@ function init() {
     specular: vec3(1,1,1),
     constants: new PhongConstants(1.0, 1.0, 0.1, 10)
   }, 'ground.jpg')
-  let plane = new Entity(gl, planeY(2, 1, 3), planeMat)
-  plane.transform.setScale(3)
+  let plane = new Entity(gl, planeY(2, 1, 8), planeMat)
+  plane.transform.setScale(8)
   plane.transform.translate(0,-1,0)
   plane.transform.computeTransform()
   scene.entities.push(plane)
@@ -93,9 +93,12 @@ function init() {
 window.onload = init
 
 function render() {
-  scene.camera.transform = new Transform(4 * Math.sin(frames / 250), 2 * Math.sin(frames/500), 2 * Math.cos(frames / 250))
+  scene.camera.transform = new Transform(4 * Math.sin(frames / 250), Math.sin(frames/500) + 0.5, 2 * Math.cos(frames / 250))
   scene.camera.transform.rotate(frames / 250 * 360 / (2 * Math.PI), vec3(0,1,0))
-  scene.camera.transform.rotate(-40 * Math.sin(frames / 500), vec3(1,0,0))
+  let rotAmt = -30 * Math.sin(frames/500)
+  // console.log(rotAmt)
+  scene.camera.computeView()
+  scene.camera.transform.rotate(rotAmt, vec3(1,0,0))
   scene.camera.computeView()
   scene.lights[0].position = vec4(0, Math.sin(frames/100), 1, 1)
   scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)
