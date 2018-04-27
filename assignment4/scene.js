@@ -22,7 +22,7 @@ function Scene(gl) {
   this.camera = null
   this.modelMatrixStack = [translate(0,0,0)]
 
-  gl.clearColor(0.12, 0.1, 0.15, 1.0);
+  gl.clearColor(0.12, 0.13, 0.18, 1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND)
   // gl.enable(gl.CULL_FACE)

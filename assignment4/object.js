@@ -13,7 +13,7 @@ Transform.prototype.computeTransform = function () {
   //
   // Scaling and rotation are performed about the center of the cube by first translating
   // in the opposite vector
-  this.transform = mult(this.translation, mult(this.scaling, mult(inverse4(this.center), mult(this.rotation, this.center))))
+  this.transform = mult(this.translation, mult(mult(this.rotation, this.scaling), this.center))
 }
 
 Transform.prototype.getTransform = function () {
@@ -28,6 +28,11 @@ Transform.prototype.rotate = function (theta, axis) {
 Transform.prototype.setScale = function (scale) {
   // HW470: replace existing scale matrix with new one
   this.scaling = scalem(scale, scale, scale)
+}
+
+Transform.prototype.setCenter = function (x,y,z) {
+  // HW470: replace existing center point
+  this.center = inverse4(translate(x,y,z))
 }
 
 Transform.prototype.translate = function (x, y, z) {

@@ -43,12 +43,12 @@ function init() {
   scene = new Scene(gl);
   scene.camera = new Camera(new Transform(0,0,3), 65, canvas.width/canvas.height, 0.1, 50);
 
-  scene.lights.push(new Light(vec4(1.5,0,1.5,1), vec3(0.5,0.3,1), 1))
-  scene.lights.push(new Light(vec4(1.5,0,-1.5,1), vec3(1,0.3,0.5), 1))
+  scene.lights.push(new Light(vec4(1.5,0,1.5,1), vec3(0.4,0.5,1), 1))
+  scene.lights.push(new Light(vec4(1.5,0,-1.5,1), vec3(1,0.6,0.3), 1))
   scene.lights.push(new Light(vec4(0,1.25,2,1), vec3(0.5,0.65,1), 2))
   scene.lights.push(new Light(vec4(5,2,2.5,1), vec3(1,1,1), 4))
   scene.lights.push(new Light(vec4(-5,2,-3,1), vec3(1,1,1), 4))
-  scene.lights.push(new Light(vec4(-3,5,-2,1), vec3(1,1,1), 20))
+  scene.lights.push(new Light(vec4(-1,4,-3,1), vec3(0.8,0.8,1), 20))
 
   let cylinderMat = new PhongMaterial(gl, {
     ambient: vec3(0.05, 0.055, 0.09),
@@ -94,36 +94,69 @@ function init() {
   }, 'metal.jpg')
   let avatar = new Entity(gl, cube(2,1,1,0.5), avatarMat)
   {
-    avatar.transform.setScale(0.5)
-    avatar.transform.translate(0, -0.25, 0)
+    avatar.transform.setScale(0.25)
+    avatar.transform.translate(0, -0.5, 0)
     avatar.transform.computeTransform()
 
     let avatarHead = new Entity(gl, cube(1,1,1,0.5), avatarMat)
     {
-      avatarHead.transform.center = translate(0, 0, 0)
+      avatarHead.transform.setCenter(-0.5, 0, 0)
       avatarHead.transform.setScale(0.5)
-      avatarHead.transform.rotate(30, vec3(0,0,1))
-      avatarHead.transform.translate(0.625, 0.15, 0)
+      avatarHead.transform.rotate(20, vec3(0,0,1))
+      avatarHead.transform.translate(1, 0.5, 0)
       avatarHead.transform.computeTransform()
 
       let avatarEarLeft = new Entity(gl, cube(1,1,3,0.5), avatarMat)
-      avatarEarLeft.transform.center = translate(0, 0, 0)
+      avatarEarLeft.transform.setCenter(0, -2.5, 0)
       avatarEarLeft.transform.setScale(0.25)
-      avatarEarLeft.transform.rotate(30, vec3(1,0,0))
-      avatarEarLeft.transform.translate(0, 0.25, -0.01)
+      avatarEarLeft.transform.rotate(-30, vec3(1,0,0))
+      avatarEarLeft.transform.translate(0, 0.25, -0.2)
       avatarEarLeft.transform.computeTransform()
 
+      avatarHead.children.push(avatarEarLeft)
+
       let avatarEarRight = new Entity(gl, cube(1,1,3,0.5), avatarMat)
-      avatarEarRight.transform.center = translate(0, 0, 0)
+      avatarEarRight.transform.setCenter(0, -2.5, 0)
       avatarEarRight.transform.setScale(0.25)
       avatarEarRight.transform.rotate(30, vec3(1,0,0))
-      avatarEarRight.transform.translate(0, 0.25, 0.01)
+      avatarEarRight.transform.translate(0, 0.25, 0.2)
       avatarEarRight.transform.computeTransform()
 
-      avatarHead.children.push(avatarEarLeft)
       avatarHead.children.push(avatarEarRight)
     }
     avatar.children.push(avatarHead)
+
+    let legFrontLeft = new Entity(gl, cube(1,1,4,0.5), avatarMat)
+    legFrontLeft.transform.setCenter(0, 4, 0)
+    legFrontLeft.transform.setScale(0.25)
+    legFrontLeft.transform.translate(0.75, 0, 0.22)
+    legFrontLeft.transform.computeTransform()
+
+    avatar.children.push(legFrontLeft)
+
+    let legFrontRight = new Entity(gl, cube(1,1,4,0.5), avatarMat)
+    legFrontRight.transform.setCenter(0, 4, 0)
+    legFrontRight.transform.setScale(0.25)
+    legFrontRight.transform.translate(0.75, 0, -0.22)
+    legFrontRight.transform.computeTransform()
+
+    avatar.children.push(legFrontRight)
+
+    let legBackLeft = new Entity(gl, cube(1,1,4,0.5), avatarMat)
+    legBackLeft.transform.setCenter(0, 4, 0)
+    legBackLeft.transform.setScale(0.25)
+    legBackLeft.transform.translate(-0.75, 0, 0.25)
+    legBackLeft.transform.computeTransform()
+
+    avatar.children.push(legBackLeft)
+
+    let legBackRight = new Entity(gl, cube(1,1,4,0.5), avatarMat)
+    legBackRight.transform.setCenter(0, 4, 0)
+    legBackRight.transform.setScale(0.25)
+    legBackRight.transform.translate(-0.75, 0, -0.25)
+    legBackRight.transform.computeTransform()
+
+    avatar.children.push(legBackRight)
   }
 
   scene.entities.push(avatar)
@@ -143,6 +176,11 @@ function render() {
   scene.lights[0].position = vec4(0, Math.sin(frames/100), 1, 1)
   scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)
   scene.lights[2].position = vec4(-4 * Math.sin(frames / 100), 1.25, 2 * Math.cos(frames / 100), 1)
+  scene.entities[3].transform.translation = translate(4 * Math.sin(frames/250), -0.5, 2 * Math.sin(2 * frames/250))
+  scene.entities[3].transform.rotation = rotateY(180 / Math.PI * Math.atan2(Math.cos(2*frames/250), 2 * Math.cos(frames/250)))
+  scene.entities[3].transform.computeTransform()
+  scene.entities[3].children[0].transform.rotation = rotateZ(15 * Math.sin(frames/10))
+  scene.entities[3].children[0].transform.computeTransform()
   scene.draw(gl)
   frames++;
   window.requestAnimationFrame(render);
