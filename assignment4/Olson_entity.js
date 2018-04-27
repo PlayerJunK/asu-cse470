@@ -8,7 +8,7 @@ function Transform(x, y, z) {
 }
 
 Transform.prototype.computeTransform = function () {
-  // HW470: Create total transform (ModelView matrix) by first performing rotation
+  // HW470: Create total transform (Model matrix) by first performing rotation
   // and then scaling and then translating
   //
   // Scaling and rotation are performed about the center of the cube by first translating
@@ -40,6 +40,7 @@ Transform.prototype.translate = function (x, y, z) {
   this.translation = mult(this.translation, translate(x, y, z))
 }
 
+// HW470: Convenience for storing phong constants
 function PhongConstants(ka, kd, ks, s) {
   this.ka = ka
   this.kd = kd
@@ -47,11 +48,15 @@ function PhongConstants(ka, kd, ks, s) {
   this.s = s
 }
 
+// HW470: get these constants represented as a vec to send to shader
 PhongConstants.prototype.asVec = function () {
   return vec4(this.ka, this.kd, this.ks, this.s)
 }
 
+// HW470: Object representing the state/information needed to render geometry
+// using a Phong-based material
 function PhongMaterial(gl, props, texturePath) {
+  // HW470: We can either have a texture or not
   if (typeof texturePath !== 'undefined') {
     this.shaderProgram = SHADER_PROGRAMS.PHONG_TEXTURED
     this.texturePath = texturePath
@@ -68,6 +73,7 @@ PhongMaterial.prototype.loadTexture = function() {
   this.textureImage.src = this.texturePath;
 }
 
+// HW470: Configure a texture
 PhongMaterial.prototype.configureTexture = function() {
   this.texture = gl.createTexture();
   gl.bindTexture( gl.TEXTURE_2D, this.texture );
@@ -80,6 +86,7 @@ PhongMaterial.prototype.configureTexture = function() {
   gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
 }
 
+// HW470: Sends all the data about this material to the shader
 PhongMaterial.prototype.sendData = function (gl) {
   gl.uniform3fv(this.shaderProgram.locs.matAmb, flatten(this.props.ambient));
   gl.uniform3fv(this.shaderProgram.locs.matDif, flatten(this.props.diffuse));
@@ -89,52 +96,22 @@ PhongMaterial.prototype.sendData = function (gl) {
   gl.uniform1i(this.shaderProgram.locs.u_texture, 0);
 }
 
-function BasicMaterial(properties) {
-  this.kind = 'basic'
-  this.props = props
-}
-
-
-function InstanceTransform(move, deform) {
-  this.movement = move
-  this.deformation = deform
-}
-
-InstanceTransform.prototype.computeTransform = function () {
-  this.transform = mult(this.movement.transform, this.deformation.transform)
-}
-
+// HW470: Holds the data about an entity: transformation, geometry, material, children
 function Entity(gl, geometry, material) {
   this.transform = new Transform(0, 0, 0)
   this.geometry = geometry
   this.material = material
   this.children = []
-  switch (this.material.kind) {
-    case 'phong':
-      this.shaderProgram = SHADER_PROGRAMS.PHONG
-      this.attribLocs = {
-        position: gl.getAttribLocation(this.shaderProgram, 'a_vertexPosition'),
-        normal: gl.getAttribLocation(this.shaderProgram, 'a_vertexNormal'),
-        texCoord: gl.getAttribLocation(this.shaderProgram, 'a_texCoord')
-      }
-      break
-    case 'basic':
-      this.shaderProgram = SHADER_PROGRAMS.BASIC
-      this.attribLocs = {
-        position: gl.getAttribLocation(this.shaderProgram, 'a_vertexPosition'),
-        color: gl.getAttribLocation(this.shaderProgram, 'a_vertexColor'),
-        texCoord: gl.getAttribLocation(this.shaderProgram, 'a_texCoord')
-      }
-      break
-  }
   this.geometry.initGL(gl)
 }
 
+// HW470: Sends the material and geometry data for this entity to the GPU
 Entity.prototype.sendData = function (gl) {
   this.material.sendData(gl)
   this.geometry.sendData(gl)
 }
 
+// HW470: Sets up the necessary opengl state to be ready to draw this entity
 Entity.prototype.bind = function(gl) {
   gl.useProgram(this.material.shaderProgram)
   this.material.sendData(gl)
@@ -142,6 +119,7 @@ Entity.prototype.bind = function(gl) {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.geometry.buffers.index)
 }
 
+// HW470: Actually draws this entity with current shader state
 Entity.prototype.draw = function (gl) {
   gl.drawElements(gl.TRIANGLES, this.geometry.indices.length, gl.UNSIGNED_SHORT, 0)
 }

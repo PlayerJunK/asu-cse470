@@ -157,8 +157,8 @@ void main()
     // No specular highlighting on the back			 
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
-    // sum
-    gl_FragColor = vec4(((diffuse + specular) / max(lMagSqr, 1.0) * lightStrength) + ambient, 1.0);
+    // sum, divide by the distance to the light squared and multiply by the light strength
+    gl_FragColor = vec4(((diffuse + specular) / (lMagSqr + 0.5) * lightStrength) + ambient, 1.0);
 }
 </script>
 
@@ -223,8 +223,8 @@ void main()
     // No specular highlighting on the back			 
     specular = vec3(step(0.0, dot(L, N))) * specular;
                      
-    // sum
-    gl_FragColor = vec4(((diffuse + specular) / max(lMagSqr, 1.0) * lightStrength) + ambient, 1.0);
+    // sum, divide by the distance to the light squared and multiply by the light strength
+    gl_FragColor = vec4(((diffuse + specular) / (lMagSqr + 0.5) * lightStrength) + ambient, 1.0);
 }
 </script>
 
@@ -232,9 +232,9 @@ void main()
 <script type="text/javascript" src="../Common/webgl-utils.js"></script>
 <script type="text/javascript" src="../Common/initShaders.js"></script>
 <script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="object.js"></script>
-<script type="text/javascript" src="scene.js"></script>
-<script type="text/javascript" src="geometry.js"></script>
+<script type="text/javascript" src="Olson_entity.js"></script>
+<script type="text/javascript" src="Olson_scene.js"></script>
+<script type="text/javascript" src="Olson_geometry.js"></script>
 <script type="text/javascript" src="Olson_hw4.js"></script>
 </head>   
 
@@ -242,13 +242,16 @@ void main()
     <!--HW470: Styles done using Tailwind CSS -->
     <div class="text-sans container mx-auto flex flex-col justify-content items-center">
         <h1 class="my-8 py-4">
-            CSE 470 HW #4: 3d Scene With Avatar
+            CSE 470 HW #4: 3d Animated Scene With Avatar
         </h1>
         <div class="pb-4 flex flex-col justify-around items-center">
-            <h2 class='inline-block m-2'>Gray Olson</h2> <h3 class='m-2 inline-block'>February 23, 2018</h2>
+            <h2 class='inline-block m-2'>Gray Olson</h2> <h3 class='m-2 inline-block'>April 26, 2018</h2>
         </div>
-        <p class="m-4 p2 leading-loose"><b>Description:</b> </p>
+        <p class="m-4 p2 leading-loose"><b>Description:</b> A 3d scene constructed using a hierarchical scene graph. A series of entities are created, each of which can have some children, and those can have children, etc. Phong shading is used to do lighting calculations (on a per fragment basis) and multiple lights are drawn using additive blending passes. The structure of the renderer is inspired by a simplified version of the THREE.js renderer.</p>
         <div class="py-4 flex justify-center items-center">
+            <button id="anim-toggle" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Toggle Animation
+            </button>
         </div>
         <!-- HW470: Increase canvas size -->
         <canvas class="my-8" id="gl-canvas" width="960" height="540">

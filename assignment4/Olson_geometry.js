@@ -1,6 +1,7 @@
 // Gray Olson
 //
 
+// HW470: Holds data about geometry and knows how to describe and send it to the GPU
 function Geometry(positions, colors, normals, texCoords, indices) {
   this.positions = positions
   this.colors = colors
@@ -10,6 +11,7 @@ function Geometry(positions, colors, normals, texCoords, indices) {
   this.initialized = false
 }
 
+// HW470: Sets up buffers for each piece of data on the GPU
 Geometry.prototype.initGL = function (gl) {
   if (!this.initialized) {
     this.buffers = {
@@ -23,6 +25,7 @@ Geometry.prototype.initGL = function (gl) {
   this.sendData(gl)
 }
 
+// HW470: Sends the data that this instance contains to the GPU
 Geometry.prototype.sendData = function (gl) {
   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
   gl.bufferData(gl.ARRAY_BUFFER, flatten(this.positions), gl.STATIC_DRAW)
@@ -46,6 +49,7 @@ Geometry.prototype.sendData = function (gl) {
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(flatten(this.indices)), gl.STATIC_DRAW)
 }
 
+// HW470: Binds the shader attribute state to the correct buffers/descriptions for this geometry
 Geometry.prototype.enableAttributes = function (gl, locs) {
   gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
   gl.vertexAttribPointer(locs.position, 4, gl.FLOAT, false, 0, 0)
@@ -198,6 +202,7 @@ function surfaceOfRevolution(surfaceGenerator, colorGenerator, tesselationFnDir,
   return new Geometry(vertices, colors, normals, texCoords, indices)
 }
 
+// HW470: Create geometry of a plane
 function planeY(w,l,texRepeat) {
   let vertices = [
     vec4(-w/2, 0, l/2, 1), vec4(w/2, 0, l/2, 1),
@@ -213,6 +218,7 @@ function planeY(w,l,texRepeat) {
   return new Geometry(vertices, colors, normals, texCoords, indices)
 }
 
+// HW470: Create geometry of a cube with separate vertices/normals/texture coordinates for each face
 function cube(w, l, h, texRepeat) {
   let vertices = [
     // top face
