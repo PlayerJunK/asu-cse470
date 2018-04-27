@@ -124,7 +124,7 @@ Scene.prototype.drawLights = function(gl) {
 
 Scene.prototype._drawInner = function(gl, entity) {
   entity.bind(gl)
-  this.pushModelMatrix(mult(entity.transform.transform, this.getModelMatrix()))
+  this.pushModelMatrix(mult(this.getModelMatrix(), entity.transform.transform))
   this.sendMvpUniforms(gl, entity.material.shaderProgram.locs)
   gl.uniform1f(entity.material.shaderProgram.locs.numLights, this.lights.length)
   this.lights.forEach((light, i) => {

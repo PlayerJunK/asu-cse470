@@ -43,11 +43,12 @@ function init() {
   scene = new Scene(gl);
   scene.camera = new Camera(new Transform(0,0,3), 65, canvas.width/canvas.height, 0.1, 50);
 
-  scene.lights.push(new Light(vec4(1.5,0,1.5,1), vec3(1,1,1), 1))
-  scene.lights.push(new Light(vec4(1.5,0,-1.5,1), vec3(1,1,1), 1))
-  scene.lights.push(new Light(vec4(0,1.25,2,1), vec3(1,1,1), 2))
+  scene.lights.push(new Light(vec4(1.5,0,1.5,1), vec3(0.5,0.3,1), 1))
+  scene.lights.push(new Light(vec4(1.5,0,-1.5,1), vec3(1,0.3,0.5), 1))
+  scene.lights.push(new Light(vec4(0,1.25,2,1), vec3(0.5,0.65,1), 2))
   scene.lights.push(new Light(vec4(5,2,2.5,1), vec3(1,1,1), 4))
   scene.lights.push(new Light(vec4(-5,2,-3,1), vec3(1,1,1), 4))
+  scene.lights.push(new Light(vec4(-3,5,-2,1), vec3(1,1,1), 20))
 
   let cylinderMat = new PhongMaterial(gl, {
     ambient: vec3(0.05, 0.055, 0.09),
@@ -84,6 +85,48 @@ function init() {
   plane.transform.translate(0,-1,0)
   plane.transform.computeTransform()
   scene.entities.push(plane)
+
+  let avatarMat = new PhongMaterial(gl, {
+    ambient: vec3(0.05, 0.055, 0.09),
+    diffuse: vec3(0.4, 0.4, 0.85),
+    specular: vec3(1,1,1),
+    constants: new PhongConstants(1.0, 1.0, 0.1, 10)
+  }, 'metal.jpg')
+  let avatar = new Entity(gl, cube(2,1,1,0.5), avatarMat)
+  {
+    avatar.transform.setScale(0.5)
+    avatar.transform.translate(0, -0.25, 0)
+    avatar.transform.computeTransform()
+
+    let avatarHead = new Entity(gl, cube(1,1,1,0.5), avatarMat)
+    {
+      avatarHead.transform.center = translate(0, 0, 0)
+      avatarHead.transform.setScale(0.5)
+      avatarHead.transform.rotate(30, vec3(0,0,1))
+      avatarHead.transform.translate(0.625, 0.15, 0)
+      avatarHead.transform.computeTransform()
+
+      let avatarEarLeft = new Entity(gl, cube(1,1,3,0.5), avatarMat)
+      avatarEarLeft.transform.center = translate(0, 0, 0)
+      avatarEarLeft.transform.setScale(0.25)
+      avatarEarLeft.transform.rotate(30, vec3(1,0,0))
+      avatarEarLeft.transform.translate(0, 0.25, -0.01)
+      avatarEarLeft.transform.computeTransform()
+
+      let avatarEarRight = new Entity(gl, cube(1,1,3,0.5), avatarMat)
+      avatarEarRight.transform.center = translate(0, 0, 0)
+      avatarEarRight.transform.setScale(0.25)
+      avatarEarRight.transform.rotate(30, vec3(1,0,0))
+      avatarEarRight.transform.translate(0, 0.25, 0.01)
+      avatarEarRight.transform.computeTransform()
+
+      avatarHead.children.push(avatarEarLeft)
+      avatarHead.children.push(avatarEarRight)
+    }
+    avatar.children.push(avatarHead)
+  }
+
+  scene.entities.push(avatar)
 
   render();
 }
