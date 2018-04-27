@@ -2,35 +2,8 @@
 // CSE 470
 var canvas;
 var gl;
-
-// HW470: Setup uniform locations and other globals need to be here so that we can use them in render as well
-var cubeInstances = [];
-var xAxis = vec3(1, 0, 0);
-var yAxis = vec3(0, 1, 0);
-var zAxis = vec3(0, 0, 1);
-var rotationAxis = xAxis;
-var uModelViewLoc, uProjectionLoc;
-var staticData = {
-  vertices: [],
-  colors: []
-};
-
 var frames = 0;
-
 var scene;
-
-// HW470: Function to multiply a 4d matrix with a 4d vector
-function mult4(mat, vec) {
-  var result = [];
-  for (var i = 0; i < vec.length; ++i) {
-    var innerSum = 0;
-    for (var j = 0; j < mat[i].length; ++j) {
-      innerSum += vec[i] * mat[i][j];
-    }
-    result.push(innerSum);
-  }
-  return result;
-}
 
 function init() {
   canvas = document.getElementById("gl-canvas");
@@ -167,20 +140,43 @@ function init() {
 window.onload = init
 
 function render() {
+  //HW470: ANIMATE CAMERA
   scene.camera.transform = new Transform(5 * Math.sin(frames / 250), Math.sin(frames/500) + 0.5, 3.5 * Math.cos(frames / 250))
   scene.camera.transform.rotate(frames / 250 * 360 / (2 * Math.PI), vec3(0,1,0))
   let rotAmt = -30 * Math.sin(frames/500)
   scene.camera.computeView()
   scene.camera.transform.rotate(rotAmt, vec3(1,0,0))
   scene.camera.computeView()
+
+  //HW470: ANIMATE LIGHTS
   scene.lights[0].position = vec4(0, Math.sin(frames/100), 1, 1)
   scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)
   scene.lights[2].position = vec4(-4 * Math.sin(frames / 100), 1.25, 2 * Math.cos(frames / 100), 1)
+
+  //HW470: ANIMATE AVATAR
+  //HW470: Animate body
   scene.entities[3].transform.translation = translate(4 * Math.sin(frames/250), -0.5, 2 * Math.sin(2 * frames/250))
   scene.entities[3].transform.rotation = rotateY(180 / Math.PI * Math.atan2(Math.cos(2*frames/250), 2 * Math.cos(frames/250)))
   scene.entities[3].transform.computeTransform()
+  //HW470 Animate head
   scene.entities[3].children[0].transform.rotation = rotateZ(15 * Math.sin(frames/10))
   scene.entities[3].children[0].transform.computeTransform()
+  //HW470 Animate ears
+  scene.entities[3].children[0].children[0].transform.rotation = rotateX(16 * Math.sin(frames/30) + 14)
+  scene.entities[3].children[0].children[0].transform.computeTransform()
+  scene.entities[3].children[0].children[1].transform.rotation = rotateX(-16 * Math.sin(frames/30) - 14)
+  scene.entities[3].children[0].children[1].transform.computeTransform()
+  //HW470 Animate legs
+  //left
+  scene.entities[3].children[1].transform.rotation = rotateZ(15 * Math.sin(frames/20))
+  scene.entities[3].children[1].transform.computeTransform()
+  scene.entities[3].children[3].transform.rotation = rotateZ(15 * Math.sin(frames/20))
+  scene.entities[3].children[3].transform.computeTransform()
+  //right
+  scene.entities[3].children[2].transform.rotation = rotateZ(-15 * Math.sin(frames/20))
+  scene.entities[3].children[2].transform.computeTransform()
+  scene.entities[3].children[4].transform.rotation = rotateZ(-15 * Math.sin(frames/20))
+  scene.entities[3].children[4].transform.computeTransform()
   scene.draw(gl)
   frames++;
   window.requestAnimationFrame(render);
