@@ -94,7 +94,6 @@ function render() {
   scene.camera.transform = new Transform(5 * Math.sin(frames / 250), Math.sin(frames/500) + 0.5, 3.5 * Math.cos(frames / 250))
   scene.camera.transform.rotate(frames / 250 * 360 / (2 * Math.PI), vec3(0,1,0))
   let rotAmt = -30 * Math.sin(frames/500)
-  // console.log(rotAmt)
   scene.camera.computeView()
   scene.camera.transform.rotate(rotAmt, vec3(1,0,0))
   scene.camera.computeView()
@@ -102,7 +101,6 @@ function render() {
   scene.lights[1].position = vec4(0, Math.cos(frames/100), -1, 1)
   scene.lights[2].position = vec4(-4 * Math.sin(frames / 100), 1.25, 2 * Math.cos(frames / 100), 1)
   scene.draw(gl)
-  // HW470: Get next availale frame and run this function again
   frames++;
   window.requestAnimationFrame(render);
 }

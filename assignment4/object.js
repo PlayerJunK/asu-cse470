@@ -2,6 +2,7 @@
 function Transform(x, y, z) {
   this.rotation = rotateX(0)
   this.translation = translate(x, y, z)
+  this.center = translate(0,0,0)
   this.transform = this.translation
   this.scaling = scalem(1, 1, 1)
 }
@@ -12,7 +13,7 @@ Transform.prototype.computeTransform = function () {
   //
   // Scaling and rotation are performed about the center of the cube by first translating
   // in the opposite vector
-  this.transform = mult(this.translation, mult(this.scaling, this.rotation))
+  this.transform = mult(this.translation, mult(inverse4(this.center), mult(mult(this.scaling, this.rotation), this.center)))
 }
 
 Transform.prototype.getTransform = function () {
